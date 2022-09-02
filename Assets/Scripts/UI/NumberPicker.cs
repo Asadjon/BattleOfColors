@@ -6,95 +6,80 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts.UI
 {
-    public class NumberPicker : MonoBehaviour
+    public class NumberPicker : ScrollView, ISerializationCallbackReceiver
     {
-        [SerializeField]
-        private Button m_leftArrow = null, m_rightArrow = null;
+        #region SerializeField Objects
+        [SerializeField] private Button m_LeftArrow = null, m_RightArrow = null;
+        [SerializeField] private TextMeshProUGUI m_TargetText = null;
+        [SerializeField] private bool m_IsSliding = false;
+        [SerializeField] private List<string> m_DisplayedValues = new List<string> { "1", "2", "3" };
+        [SerializeField] private int m_Value = 0;
+        [SerializeField] private UnityEvent<int> m_OnChangeValue = null;
+        #endregion
 
-        [SerializeField]
-        private TextMeshProUGUI m_targetText = null;
+        #region Local Objects
+        private string mDisplayedValue = string.Empty;
+        #endregion
 
-        [SerializeField]
-        private int m_Min = 0;
-        public int Min { get => m_Min; }
-
-        [SerializeField]
-        private int m_Max = 2;
-        public int Max { get => m_Max; }
-
-        [SerializeField]
-        private int m_Value = 1;
+        #region Getters And Setters
+        public int Max { get => m_DisplayedValues.Count; }
         public int Value { get => m_Value; 
             set 
-            { 
-                m_Value = value;
-                m_DisplayedValue = m_DisplayedValues[m_Value];
-                updateUI();
+            {
+                m_Value = Mathf.Clamp(value, 0, Max - 1);
+                slidingValue = Value / (Max - 1f);
+                mDisplayedValue = m_DisplayedValues[Value];
+                UpdateUI();
             } 
         }
-
-        public UnityEvent onChangeValue = null;
-
-        private List<string> m_DisplayedValues = new List<string>();
+        public bool IsSliding { get => m_IsSliding; set => m_IsSliding = value; }
+        public UnityEvent<int> OnChangeValue { get => m_OnChangeValue; }
         public List<string> DisplayedValues { get => m_DisplayedValues;
             set
             {
                 m_DisplayedValues = value;
-                m_Max = m_DisplayedValues.Count-1;
-                DisplayedValue = m_DisplayedValues[m_Value];
+                mDisplayedValue = DisplayedValues[m_Value];
             }
         }
+        #endregion
 
-        private string m_DisplayedValue = string.Empty;
-        public string DisplayedValue { get => m_DisplayedValue;
-            set
+        protected internal int value { get => m_Value; set => m_Value = value; }
+
+        protected override void LoadData()
+        {
+            base.LoadData();
+
+            if (m_LeftArrow) m_LeftArrow.onClick.AddListener(() => Value -= 1);
+            if (m_RightArrow) m_RightArrow.onClick.AddListener(() => Value += 1);
+
+            if (m_DisplayedValues.Count > 0) mDisplayedValue = m_DisplayedValues[Value];
+        }
+
+        private void UpdateUI()
+        {
+            if (m_TargetText) m_TargetText.text = mDisplayedValue;
+
+            if (m_RightArrow) m_RightArrow.interactable = Value < Max - 1;
+            if (m_LeftArrow) m_LeftArrow.interactable = Value > 0;
+
+            OnChangeValue.Invoke(Value);
+        }
+
+        protected override void OnSlidingValueChange(float value)
+        {
+            if (IsSliding && (int)Mathf.Lerp(0f, Max - 1f, value) is var newValue && newValue != Value)
             {
-                Value = m_DisplayedValues.IndexOf(value);
+                m_Value = newValue;
+                mDisplayedValue = m_DisplayedValues[Value];
+                UpdateUI();
             }
         }
 
-        public NumberPicker()
+        public void OnBeforeSerialize()
         {
-            for (int i = m_Min; i <= m_Max; i++)
-                DisplayedValues.Add(i.ToString());
+            Value = m_Value;
         }
 
-        private void Awake()
-        {
-            if(m_leftArrow)
-                m_leftArrow.onClick.AddListener(leftArrowClick);
-            if (m_rightArrow)
-                m_rightArrow.onClick.AddListener(rightArrowClick);
-
-            DisplayedValue = m_DisplayedValues[m_Value];
-        }
-
-        public void leftArrowClick() => subtract();
-
-        public void rightArrowClick() => add();
-
-        private void add()
-        {
-            Value = Mathf.Clamp(m_Value + 1, m_Min, m_Max);
-        }
-
-        private void subtract()
-        {
-            Value = Mathf.Clamp(m_Value - 1, m_Min, m_Max);
-        }
-
-        private void updateUI()
-        {
-
-            if (m_targetText)
-                m_targetText.text = m_DisplayedValue;
-
-            if (m_rightArrow)
-                m_rightArrow.interactable = !(Value >= m_Max);
-            if (m_leftArrow)
-                m_leftArrow.interactable = !(Value <= m_Min);
-
-            onChangeValue.Invoke();
-        }
+        public void OnAfterDeserialize() { }
     }
 }

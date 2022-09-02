@@ -1,114 +1,68 @@
 ﻿using Assets.Scripts.UI;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
-using static Assets.Scripts.ActivityManager;
-using static Assets.Scripts.GameOptions;
 
 namespace Assets.Scripts.Activitys
 {
     public class OptionsActivity : Activity
     {
-        [SerializeField]
-        private Transition m_TransitionAnim = null;
+        public static int ActivityType { get; set; } = ActivitesID.Instance.GetId<SinglePlayerGameActivity>();
+        
+        [SerializeField] private NumberPicker m_NumberPicker = null;
+        [SerializeField] private ToggleGroup m_GameTypes = null;
+        [SerializeField] private ToggleGroup m_GameLevels = null;
 
-        [SerializeField]
-        private int m_WaitingTransition = 1;
-
-        [SerializeField]
-        private NumberPicker m_NumberPicker = null;
-
-        [SerializeField]
-        private Toggle 
-            m_ShowNumberView = null,
-            m_ShowColorView = null,
-            m_ShowImageView = null;
-
-        private void Awake()
+        protected override void Awake()
         {
-            if (m_NumberPicker)
+            base.Awake();
+
+            var gameOptions = GameOptions.Instance;
+
+            var disVal = new List<string>();
+            for (int i = GameOptions.MinNumberOfArrays; i <= GameOptions.MaxNumberOfArrays; i++)
+                disVal.Add(i.ToString());
+
+            m_NumberPicker.DisplayedValues = disVal;
+            m_NumberPicker.Value = disVal.IndexOf(gameOptions.NumberOfArrays.ToString());
+            m_NumberPicker.OnChangeValue.AddListener(value =>
+            gameOptions.NumberOfArrays = int.Parse(disVal[value]));
+
+            var gameTypes = m_GameTypes.GetComponentsInChildren<Toggle>();
+            if (gameTypes.Length - 1 == (int)GameOptions.GameTypes.WithNumber)
             {
-                List<string> disVal = new List<string>();
-                for (int i = Instance.minNumberOfArrays; i <= Instance.maxNumberOfArrays; i++)
-                    disVal.Add(i.ToString());
-
-                m_NumberPicker.DisplayedValues = disVal;
-                m_NumberPicker.DisplayedValue = Instance.numberOfArrays.ToString();
-
-                m_NumberPicker.onChangeValue.AddListener(delegate
-                {
-                    Instance.numberOfArrays = Convert.ToInt16(m_NumberPicker.DisplayedValue);
-                });
+                foreach (var type in gameTypes)
+                    type.onValueChanged.AddListener(value =>
+                    { if (value) gameOptions.GameType = (GameOptions.GameTypes)Array.IndexOf(gameTypes, type); });
+                gameTypes[(int)gameOptions.GameType].isOn = true;
             }
 
-            if (m_ShowNumberView)
-            {
-                m_ShowNumberView.isOn = Instance.viewsShowText;
-                m_ShowNumberView.onValueChanged.AddListener(delegate
-                {
-                    Instance.viewsShowText = m_ShowNumberView.isOn;
-                });
-            }
 
-            if (m_ShowColorView)
-            {
-                m_ShowColorView.isOn = Instance.viewsShowColor;
-                m_ShowColorView.onValueChanged.AddListener(delegate
-                {
-                    Instance.viewsShowColor = m_ShowColorView.isOn;
-                });
-            }
+            var gameLevels = m_GameLevels.GetComponentsInChildren<Toggle>();
+            if (gameLevels.Length - 1 < (int)GameOptions.GameLevels.Expert) return;
 
-            if (m_ShowImageView)
-            {
-                m_ShowImageView.isOn = Instance.viewsShowImage;
-                m_ShowImageView.onValueChanged.AddListener(delegate
-                {
-                    Instance.viewsShowImage = m_ShowImageView.isOn;
-                });
-            }
+            gameLevels[(int)gameOptions.Level].isOn = true;
+            foreach (var level in gameLevels)
+                level.onValueChanged.AddListener(value =>
+                { if (value) gameOptions.Level = (GameOptions.GameLevels)Array.IndexOf(gameLevels, level); });
         }
 
-        public void StartGameClick()
-        {
-            startTransitionAnim(ActivitesID.GetId(typeof(MultiGameActivity)), ScreenOrientation.Landscape);
-        }
+        public void PlaySound(string soundName) => AudioManager.Instance.Play(soundName);
 
+        public void StartGameClick() =>
+            StartTransitionAnim(ActivityType);
 
         #region Activites actions
-        public override void OnBackPressed()
-        {
-            startTransitionAnim(ActivitesID.GetId(typeof(MenuActivity)), ScreenOrientation.Portrait);
-        }
 
-        private void startTransitionAnim(int sceneId, ScreenOrientation orientation)
-        {
-            m_TransitionAnim.StartingEnd.AddListener(delegate
-            {
-                Screen.orientation = orientation;
-                StartCoroutine(loadNextActivity(sceneId));
-            });
-            m_TransitionAnim.setSpeed(m_WaitingTransition);
-            m_TransitionAnim.startTransition();
-        }
+        public override void OnBackPressed() =>
+            StartTransitionAnim(ActivitesID.Instance.GetId<MenuActivity>());
 
-        private IEnumerator loadNextActivity(int sceneId)
-        {
-            yield return new WaitForSeconds(m_WaitingTransition / 2f);
+        public override void StartActivity() =>
+            Screen.orientation = ScreenOrientation.Portrait;
 
-            GetActivityManager.LoadActivity(sceneId);
-        }
+        public override void WaitActivity() => Finish();
 
-        public override void pauseActivity()
-        {
-            finish();
-        }
         #endregion
-
     }
 }

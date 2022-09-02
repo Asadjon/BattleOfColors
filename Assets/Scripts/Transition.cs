@@ -1,38 +1,17 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.AnimControllers;
 using UnityEngine.Events;
 
 namespace Assets.Scripts
 {
-    public class Transition : MonoBehaviour
+    class Transition : AnimController
     {
-        [SerializeField]
-        private Animator m_Animator = null;
-
+        [UnityEngine.SerializeField] private float m_Duration = 1f;
         public UnityEvent StartingEnd = null;
 
-        private void Awake()
-        {
-            DontDestroyOnLoad(gameObject);
-        }
+        public void OnEnable() => SetParam(0, m_Duration);
 
-        private void Start()
-        {
-            StartingEnd = new UnityEvent();
-        }
+        public void StartTransition() => SetParam(1, default(char));
 
-        public void setSpeed(float speed)
-        {
-            m_Animator.SetFloat("speed", speed);
-        }
-
-        public void startTransition()
-        {
-            m_Animator.SetTrigger("start");
-        }
-
-        public void StartAnimEnding()
-        {
-            StartingEnd.Invoke();
-        }
+        public void StartAnimEnding() => StartingEnd.Invoke();
     }
 }

@@ -1,120 +1,154 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Scripts.Resource;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using static Assets.Scripts.GameOptions;
+using static UnityEngine.Vector2;
 
 namespace Assets.Scripts.Players
 {
-    public class Player : MonoBehaviour
+    [ExecuteInEditMode]
+    class Player : UIBehaviour
     {
-        public string m_PlayerName = "Player";
+        [SerializeField] private string m_PlayerName = "Player";
+        [SerializeField] private GameBoard m_GameBoard = null;
+        [SerializeField] private DirectoryBoard m_DirectoryBoard = null;
+        [SerializeField] private float m_Padding = 16f;
+        [SerializeField] private UnityEvent<string> m_GameOver = null;
 
-        public GameBoard m_GameBoard = null;
-        public DirectoryBoard m_DirectoryBoard = null;
+        public static implicit operator SerializationPlayer(Player player) => new SerializationPlayer
+        {
+            PlayerName = player.m_PlayerName,
+            GameBoard = player.m_GameBoard.Implicit(),
+            DirectoryBoard = player.m_DirectoryBoard,
+            Resources = player.m_DirectoryBoard.Resources.ConvertAll(res => (MyViewResource) res).ToArray()
+        };
 
-        public UnityAction<string> gameOverAction = null;
+        public Player Set(SerializationPlayer myPlayer)
+        {
+            m_PlayerName = myPlayer.PlayerName;
+            m_GameBoard.Set(myPlayer.GameBoard);
+            m_DirectoryBoard.Set(myPlayer.DirectoryBoard);
 
-        public bool showImage { set 
-            {
-                if (m_GameBoard) m_GameBoard.showImage = value;
-                if (m_DirectoryBoard) m_DirectoryBoard.showImage = value;
-            }
+            var resources = myPlayer.Resources.ToList().ConvertAll(res => (ViewResource) res);
+            m_DirectoryBoard.Resources = resources;
+
+            var count = m_DirectoryBoard.Resources.Count;
+            m_GameBoard.Resources = ViewResource.CreateMultiple(resources, MyStaticHelper.ChangeViewResource);
+
+            return this;
         }
-        public bool showColor
+
+        public string PlayerName { get => m_PlayerName; set => m_PlayerName = value; }
+        public UnityEvent<string> OnGameOver { get => m_GameOver; }
+        public GameTypes GameType
         {
             set
             {
-                if (m_GameBoard) m_GameBoard.showColor = value;
-                if (m_DirectoryBoard) m_DirectoryBoard.showColor = value;
-            }
-        }
-        public bool showText
-        {
-            set
-            {
-                if (m_GameBoard) m_GameBoard.showText = value;
-                if (m_DirectoryBoard) m_DirectoryBoard.showText = value;
+                if (m_DirectoryBoard) m_GameBoard.GameType = value;
             }
         }
 
-        public void initializeGame(int numberOfArrays, List<ViewResources> resources)
-        {
-            if (m_DirectoryBoard)
-            {
-                m_DirectoryBoard.initialization(numberOfArrays, resources);
-            }
-            if (m_GameBoard)
-            {
-                m_GameBoard.initialization(numberOfArrays, resources);
-                m_GameBoard.gameOver.AddListener(delegate { gameOverAction(m_PlayerName); });
-            }
 
-            calculateSize(numberOfArrays);
+#if UNITY_EDITOR
+        private UnityAction<int> mOnChange;
+        private void Update()
+        {
+            if (mOnChange == null)
+                GameOptions.Instance.OnChangeNumberOfArrays.AddListener(mOnChange = asd => InitializeGame());
+        }
+#endif
+
+        [ContextMenu("Initialize Game")]
+        private void InitializeGame()
+        {
+            var numberOfArray = GameOptions.Instance ? GameOptions.Instance.NumberOfArrays : DefaultNumberOfArrays;
+            var withText = GameOptions.Instance ? GameOptions.Instance.GameType : DefaultGameType;
+
+            CalculateSize(numberOfArray);
+
+            var resources = ViewResource.GenerateResources(numberOfArray);
+
+            m_DirectoryBoard.LoadDataPreview(numberOfArray, resources);
+            m_GameBoard.LoadDataPreview(numberOfArray,
+                ViewResource.CreateMultiple(resources, MyStaticHelper.ChangeViewResource));
         }
 
-        public void calculateSize(int count)
+        public void InitializeGame(int numberOfArrays, List<ViewResource> resources)
         {
-            // getting RectTransforms of parents
-            RectTransform gameBoardParent = m_GameBoard ? m_GameBoard.GetComponent<Transform>().parent.GetComponent<RectTransform>() : null;
-            RectTransform directoryBoardParent = m_DirectoryBoard ? m_DirectoryBoard.GetComponent<Transform>().parent.GetComponent<RectTransform>() : null;
+            CalculateSize(numberOfArrays);
 
-            // getting real sizes
-            Vector2 playerRectSize = GetComponent<RectTransform>().rect.size;
-            Vector2 sizeOfGameBoardParent = gameBoardParent ? gameBoardParent.rect.size : Vector2.zero;
-            Vector2 sizeOfDirectoryBoardParent = directoryBoardParent ? directoryBoardParent.rect.size : Vector2.zero;
+            m_DirectoryBoard.Initialize(numberOfArrays, resources);
+            m_GameBoard.Initialize(numberOfArrays,
+                ViewResource.CreateMultiple(resources, MyStaticHelper.ChangeViewResource),
+                () => OnGameOver.Invoke(m_PlayerName));
+        }
+
+        [ContextMenu("Calculate Size")]
+        private void CalculateSize() =>
+            CalculateSize(FindObjectOfType<GameOptions>() is GameOptions gameOptions ? gameOptions.NumberOfArrays : DefaultNumberOfArrays);
+
+        public void CalculateSize(int count)
+        {
+            // get size of Player
+            var playerRectSize = (transform as RectTransform).rect.size;
+
+            var padding = one * m_Padding;
 
             // calculate one SwipeView size
-            float viewSize =
-                (sizeOfGameBoardParent.x * sizeOfGameBoardParent.y + sizeOfDirectoryBoardParent.x * sizeOfDirectoryBoardParent.y) /
-                (count * Mathf.Max(sizeOfGameBoardParent.x, sizeOfGameBoardParent.y) + Mathf.Max(sizeOfGameBoardParent.x, sizeOfGameBoardParent.y));
-
-            viewSize = float.IsInfinity(viewSize) ? 0 : viewSize;
+            var givenSize = playerRectSize - 2f * padding - (Max(m_GameBoard.ContentPadding, m_DirectoryBoard.ContentPadding) * right + (m_GameBoard.ContentPadding + m_DirectoryBoard.ContentPadding) * up);
+            var viewSize = Mathf.Min(givenSize.x / count, givenSize.y / (count + 1));
 
             // calculate anchored sizes
-            Vector2 gameBoardAnchoredSize = new Vector2(viewSize * count / playerRectSize.x, viewSize * count / playerRectSize.y);
-            Vector2 directoryBoardAnchoredSize = new Vector2(viewSize * count / playerRectSize.x, viewSize / playerRectSize.y);
+            var gbAnchoredSize = (count * viewSize * one + m_GameBoard.ContentPadding) / playerRectSize;
+            var dbAnchoredSize = (viewSize * (count * right + up) + m_DirectoryBoard.ContentPadding) / playerRectSize;
+            padding /= playerRectSize;
 
-            // change GameBoard size 
-            if (gameBoardParent)
-            {
-                gameBoardParent.anchorMin = Vector2.right * (1 - gameBoardAnchoredSize.x) / 2f;
-                gameBoardParent.anchorMax = new Vector2(1 - gameBoardParent.anchorMin.x, gameBoardAnchoredSize.y);
-            }
-            // change DirectoryBoard size 
-            if (directoryBoardParent)
-            {
-                directoryBoardParent.anchorMin = new Vector2((1 - directoryBoardAnchoredSize.x) / 2f, 1 - directoryBoardAnchoredSize.y);
-                directoryBoardParent.anchorMax = new Vector2(1 - directoryBoardParent.anchorMin.x, 1f);
-            }
+            // get size of GameBoard and DirectoryBoard
+            var gbRect = m_GameBoard.transform as RectTransform;
+            var dbRect = m_DirectoryBoard.transform as RectTransform;
+
+            // change sizes
+            gbRect.anchorMin = (right - right * gbAnchoredSize + up * padding) / 2f;
+            gbRect.anchorMax = (right + right * gbAnchoredSize) / 2f + up * (gbRect.anchorMin + gbAnchoredSize);
+
+            dbRect.anchorMin = (right - right * dbAnchoredSize + up * 2f * (padding + gbRect.anchorMax)) / 2f;
+            dbRect.anchorMax = (right + right * dbAnchoredSize) / 2f + up * (dbRect.anchorMin + dbAnchoredSize);
+
+            m_GameBoard.ChangeSize(viewSize);
+            m_DirectoryBoard.ChangeSize(viewSize);
         }
 
-        public void startGame()
+        public void AddSwipeAction(UnityAction action) =>
+            m_GameBoard.OnSwipeViews.AddListener(action);
+
+        public void StartGame()
         {
-            if (m_GameBoard)
-            {
-                m_GameBoard.startGame();
-                m_GameBoard.playGame();
-            }
+            m_GameBoard.StartGame();
         }
 
-        public void playGame()
+        public void PlayGame() => m_GameBoard.PlayGame();
+
+        public void PauseGame() => m_GameBoard.PauseGame();
+
+        public void NewGame()
         {
-            if (m_GameBoard) m_GameBoard.playGame();
-        }
+            m_DirectoryBoard.StartShuffle();
+            var count = m_DirectoryBoard.Resources.Count;
+            m_GameBoard.Resources = ViewResource.CreateMultiple(m_DirectoryBoard.Resources, MyStaticHelper.ChangeViewResource);
 
-        public void pauseGame()
-        {
-            if (m_GameBoard) m_GameBoard.pauseGame();
+            m_GameBoard.Restart();
         }
+    }
 
-        public void shuffle()
-        {
-            if(m_DirectoryBoard) m_DirectoryBoard.startShuffle();
-
-            if (m_GameBoard)
-            {
-                if (m_DirectoryBoard) m_GameBoard.Resources = m_DirectoryBoard.viewResources;
-                m_GameBoard.returnToStartingPosition();
-            }
-        }
+    [Serializable] struct SerializationPlayer
+    {
+        public string PlayerName;
+        public SerializationGameBoard GameBoard;
+        public MyDirectoryBoard DirectoryBoard;
+        public MyViewResource[] Resources;
     }
 }

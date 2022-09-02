@@ -1,115 +1,163 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Scripts.Resource;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using static Assets.Scripts.GameOptions;
 
 namespace Assets.Scripts.Players
 {
-    public class DirectoryBoard : MonoBehaviour
+    class DirectoryBoard : MonoBehaviour
     {
-        public SwipeView m_OrginalSwipeView = null;
+        #region SerializeField Objects
+        [SerializeField] private ItemView m_ItemViewPrefab = null;
+        [SerializeField] private Node m_BlockPrefab = null;
+        [SerializeField] private RectTransform m_ContentOfItemViews = null;
+        [SerializeField] private RectTransform m_ContentOfNodes = null;
+        [SerializeField] private float m_MinPadding = 1f;
+        [SerializeField] private float m_MaxPadding = 3f;
+        #endregion
 
-        public Player m_Player { get; set; } = null;
+        #region Local Objects
+        private readonly List<ItemView> mItemViews = new List<ItemView>();
+        protected List<Node> mNodes = new List<Node>();
+        private int mNumberOfArrays = default;
+        private float mSizeOfView = default;
+        private List<ViewResource> mResources = new List<ViewResource>();
+        #endregion
 
-        private List<SwipeView> mWorkViews = new List<SwipeView>();
-        public List<ViewResources> viewResources { get; private set; } = new List<ViewResources>();
+        #region Getters And Setters
 
-        private int numberOfArrays = defaultNumberOfArrays;
+        public static implicit operator MyDirectoryBoard(DirectoryBoard directoryBoard) =>
+            new MyDirectoryBoard { Nodes = directoryBoard.mNodes.ConvertAll(node => (SerializebleNode)node).ToArray() };
 
-        private float anchorOfView = 0f;
-
-        public bool showImage { get; set; }
-        public bool showColor { get; set; }
-        public bool showText { get; set; }
-
-        public void initialization(int numberOfArrays, List<ViewResources> resources)
+        public void Set(MyDirectoryBoard myDirectoryBoard)
         {
-            this.numberOfArrays = numberOfArrays;
-            viewResources = resources;
-            anchorOfView = 1f / numberOfArrays;
+            var nodes = mNodes.ToDictionary(node => node.PositionInTheArray);
+            var itemViews = mItemViews.ToDictionary(item => item.Id);
 
-            notifyViews();
+            Array.ForEach(myDirectoryBoard.Nodes, myNode => nodes[(Vector2Int)myNode.Position].SetItemViewWithoutAnim(itemViews[myNode.ItemId]));
         }
 
-        private void initViews()
-        {
-            // create SwipeViews
-            for (int i = 0; i < numberOfArrays; i++)
+        public List<ViewResource> Resources { 
+            get => mNodes.ConvertAll(node => node.ItemView.Resource);
+            set
             {
-                SwipeView view = Instantiate(m_OrginalSwipeView, transform);
-                createView(view, i);
-                mWorkViews.Add(view);
+                mResources = value;
+                mNodes.ForEach(node => node.ItemView.Resource = mResources[mNodes.IndexOf(node)]);
             }
         }
+        public Vector2 ContentPadding { get => GetComponent<RectTransform>().rect.size - (m_ContentOfItemViews ? m_ContentOfItemViews.rect.size : GetComponent<RectTransform>().rect.size); }
+        #endregion
 
-        private void createView(SwipeView view, int i)
+        private void Awake() => LoadData();
+
+        [ContextMenu("Initialize")]
+        public void LoadDataPreview()
         {
-            Vector2 pos = new Vector2(i, 0);
-
-            RectTransform viewTransform = view.GetComponent<RectTransform>();
-
-            float left = anchorOfView * pos.x;
-            float top = 1f;
-            float right = left + anchorOfView;
-            float bottom = 0;
-
-            viewTransform.anchorMin = new Vector2(left, bottom);
-            viewTransform.anchorMax = new Vector2(right, top);
-
-            viewTransform.sizeDelta = new Vector2(0f, 0f);
-
-            view.Resources = viewResources[(int)pos.x];
-            view.positionInTheArray = pos;
-            view.isShowText = showText;
-            view.isShowColor = showColor;
-            view.isShowImage = showImage;
+            var numberOfArray = FindObjectOfType<GameOptions>() is GameOptions gameOptions ? gameOptions.NumberOfArrays : DefaultNumberOfArrays;
+            LoadData();
+            Initialize(numberOfArray, ViewResource.GenerateResources(numberOfArray));
         }
 
-        private void shuffle()
+        [ContextMenu("Calculate size")]
+        public void CaluclateSize()
         {
-            for (var i = viewResources.Count - 1; i > 0; i--)
+            mNumberOfArrays = FindObjectOfType<GameOptions>() is GameOptions gameOptions ? gameOptions.NumberOfArrays : DefaultNumberOfArrays;
+            ChangeSize(m_ContentOfNodes.GetComponent<RectTransform>().rect.size.x / mNumberOfArrays);
+        }
+
+        public void ChangeSize(float sizeOfView)
+        {
+            mSizeOfView = sizeOfView;
+            var i = 0;
+            mNodes.ConvertAll(node => node.GetComponent<RectTransform>()).ForEach(node =>
             {
-                var randomIndex = UnityEngine.Random.Range(0, i + 1); //maxValue (i + 1) is EXCLUSIVE
-                Swap(viewResources, i, randomIndex);
-            }
+                var pos = Vector2.right * i++;
+                node.sizeDelta = Vector2.one * mSizeOfView;
+                node.anchoredPosition = pos * mSizeOfView;
+            });
+
+            mItemViews.ForEach(item => item.ChangePosition());
         }
 
-        private void Swap(List<ViewResources> list, int indexA, int indexB)
+        public void LoadDataPreview(int numberOfArrays, List<ViewResource> resources)
         {
-            var temp = list[indexA];
-            list[indexA] = list[indexB];
-            list[indexB] = temp;
+            LoadData();
+            Initialize(numberOfArrays, resources);
         }
 
-        public void startShuffle()
+        private void LoadData()
         {
-            shuffle();
+            if (!m_ContentOfItemViews) m_ContentOfItemViews = (RectTransform) transform;
 
-            for (int i = 0; i < numberOfArrays; i++)
+            mNumberOfArrays = DefaultNumberOfArrays;
+        }
+
+        public void Initialize(int numberOfArrays, List<ViewResource> resources)
+        {
+            mNumberOfArrays = numberOfArrays;
+            mResources = resources;
+            mSizeOfView = m_ContentOfNodes.GetComponent<RectTransform>().rect.size.x / numberOfArrays;
+            m_ContentOfNodes.sizeDelta = m_ContentOfItemViews.sizeDelta;
+            m_ContentOfNodes.anchoredPosition = m_ContentOfItemViews.anchoredPosition;
+
+            NotifyViews();
+        }
+
+        private void CreateViews()
+        {
+            for (var i = 0; i < mNumberOfArrays; i++)
             {
-                ViewResources resource = viewResources[i];
-                 SwipeView view = mWorkViews.FirstOrDefault(v => v.Resources.Equals(resource));
-                float move = (i - view.positionInTheArray.x) * 1f / numberOfArrays;
+                var pos = Vector2Int.right * i;
 
-                view.positionInTheArray = new Vector2(i, 0);
-
-                view.startTranslateAnimation(move, 0, Instance.shuffleAnimDuration);
+                var node = Instantiate(m_BlockPrefab, m_ContentOfNodes);
+                node.name = "Node " + i;
+                node.PositionInTheArray = pos;
+                var blockTransform = node.GetComponent<RectTransform>();
+                blockTransform.sizeDelta = Vector2.one * mSizeOfView;
+                blockTransform.anchoredPosition = Vector2.one * pos * mSizeOfView;
+                mNodes.Add(node);
             }
+
+            var offset = Mathf.Lerp(m_MaxPadding, m_MinPadding, (mNumberOfArrays - MinNumberOfArrays) / (MaxNumberOfArrays - MinNumberOfArrays));
+            mNodes.ForEach(node =>
+            {
+                var view = Instantiate(m_ItemViewPrefab, m_ContentOfItemViews);
+                var index = mNodes.IndexOf(node);
+
+                view.name = "Item " + index;
+                node.SetItemViewWithoutAnim(view);
+                view.Id = index;
+                view.Resource = mResources[node.PositionInTheArray.x];
+                mItemViews.Add(view);
+
+                node.ChangeChildOffset(offset);
+            });
         }
 
-        public void notifyViews()
+        public void StartShuffle()
         {
-            removeAllViews();
-            mWorkViews.Clear();
-            initViews();
+            var i = 0;
+            mNodes.Shuffle().ForEach(node => node.SetItemViewWithAnim(mItemViews[i++]));
         }
 
-        private void removeAllViews()
+        public void NotifyViews()
         {
-            int count = mWorkViews.Count;
-            for (int i = 0; i < count; i++)
-                Destroy(mWorkViews[i]);
+            RemoveAllViews();
+            CreateViews();
         }
 
+        private void RemoveAllViews()
+        {
+            Array.ForEach(m_ContentOfNodes.GetComponentsInChildren<Node>(), block => DestroyImmediate(block.gameObject));
+
+            Array.ForEach(m_ContentOfItemViews.GetComponentsInChildren<ItemView>(), view => DestroyImmediate(view.gameObject));
+
+            mItemViews.Clear();
+            mNodes.Clear();
+        }
     }
+
+    [Serializable] struct MyDirectoryBoard { public SerializebleNode[] Nodes; }
 }

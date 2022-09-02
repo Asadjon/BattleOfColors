@@ -1,78 +1,81 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Events;
 
-namespace Assets.Scripts
+namespace Assets.Scripts.Players
 {
-    public class TranslateAnimation : MonoBehaviour
+    class TranslateAnimation : MonoBehaviour
     {
-        private RectTransform myView;
+        [SerializeField] private UnityEvent m_EndAnim = null;
 
-        public UnityEvent endAnim = null;
+        private RectTransform mMyView;
+        private Vector mFromDelta;
+        private Vector2 mToDelta;
+        private float mDuration;
+        private float mMillisLeft;
 
-        private Vector2 fromDelta;
+        public UnityEvent EndAnim { get => m_EndAnim; set => m_EndAnim = value; }
+        public bool IsRunning { get; private set; } = false;
 
-        private Vector2 toDelta;
-
-        private int duration;
-
-        public bool isRunning { get; private set; } = false;
-
-        private int millisLeft;
-
-        private void Awake()
-        {
-            myView = GetComponent<RectTransform>();
-        }
+        private void Awake() => mMyView = GetComponent<RectTransform>();
 
         private void Update()
         {
-            if (isRunning && calc)
-                invalidate();
-            else if(isRunning)
-                cancelAnim();
+            if (Calc) Invalidate();
+            else if (IsRunning) CancelAnim();
         }
 
-        protected bool calc => millisLeft++ < duration;
+        protected bool Calc => IsRunning && (mMillisLeft -= Time.deltaTime) >= 0f;
 
-        public TranslateAnimation Set(float fromXDelta, float fromYDelta, float toXDelta, float toYDelta, float second)
+        public TranslateAnimation Set(Vector2 fromDelta, Vector2 toDelta, float duration)
         {
-            fromDelta = new Vector2(myView.anchoredPosition.x + fromXDelta, myView.anchoredPosition.y + fromYDelta);
-            toDelta = new Vector2(toXDelta, toYDelta);
-            duration = (int)(second * 60f);
+            mFromDelta = Vector.NewInstance(mMyView.anchorMin + fromDelta * 1f, mMyView.anchorMax + fromDelta * 1f);
 
-            millisLeft = 0;
-            isRunning = false;
+            mToDelta = toDelta;
+            mDuration = duration;
+            mMillisLeft = mDuration;
+            IsRunning = false;
 
             return this;
         }
 
-        public TranslateAnimation start()
+        public TranslateAnimation StartAnim()
         {
-            myView.anchoredPosition = fromDelta;
-
-            isRunning = true;
-
+            mMyView.anchorMin = mFromDelta.Min;
+            mMyView.anchorMax = mFromDelta.Max;
+            IsRunning = true;
             return this;
         }
 
-        public void cancelAnim()
+        public void CancelAnim()
         {
-            millisLeft = 0;
-            isRunning = false;
-            endAnim.Invoke();
+            mMyView.anchorMin = mFromDelta.Min + mToDelta * 1f;
+            mMyView.anchorMax = mFromDelta.Max + mToDelta * 1f;
+
+            mMillisLeft = -1f;
+            IsRunning = false;
+            m_EndAnim.Invoke();
         }
 
-        private void invalidate()
+        private void Invalidate()
         {
-            Vector2 min = myView.anchorMin;
-            Vector2 max = myView.anchorMax;
+            var scaler = 1f - mMillisLeft / mDuration;
 
-            Vector2 newMin = min + toDelta / duration;
-            Vector2 newMax = max + toDelta / duration;
+            mMyView.anchorMin = mFromDelta.Min + mToDelta * scaler;
+            mMyView.anchorMax = mFromDelta.Max + mToDelta * scaler;
+        }
 
-            myView.anchorMin = newMin;
-            myView.anchorMax = newMax;
+        class Vector
+        {
+            public Vector2 Min { get; set; }
+            public Vector2 Max { get; set; }
+
+            public Vector(Vector2 min, Vector2 max)
+            {
+                Min = min;
+                Max = max;
+            }
+
+            public static Vector NewInstance(Vector2 min, Vector2 max) => new Vector(min, max);
         }
     }
 }

@@ -1,9 +1,6 @@
 ﻿using Assets.Scripts.Activitys;
-using Assets.Scripts.Interface;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 using static UnityEngine.SceneManagement.SceneManager;
 using static UnityEngine.Object;
@@ -12,94 +9,69 @@ namespace Assets.Scripts
 {
     class ActivityManager
     {
-        public static ActivityManager NewInstanse() => GetActivityManager != null ? GetActivityManager : (GetActivityManager = new ActivityManager());
+        public static ActivityManager NewInstanse() => GetActivityManager ?? (GetActivityManager = new ActivityManager());
 
         public static ActivityManager GetActivityManager { get; private set; } = null;
 
-        public List<SceneAction> actions { get; set; } = null;
-
         public enum ActionScene { Loaded, Unloaded }
 
-        public List<int> loadingActivityes;
+        public List<int> LoadingActivityes;
 
-        public ActivityManager()
+        private ActivityManager()
         {
-            loadingActivityes = new List<int>();
+            LoadingActivityes = new List<int>();
 
-            StartApplication();
-        }
-
-
-        public void Start()
-        {
-            loadData();
-        }
-
-        private void loadData()
-        {
-            LoadScene(1, LoadSceneMode.Additive);
-            SceneManager.sceneLoaded += sceneLoaded;
-            sceneUnloaded += sceneUnLoaded;
-
-            actions = new List<SceneAction>();
-        }
-
-        public void StartApplication()
-        {
-            Scene mainScene = GetSceneByBuildIndex(0);
+            var mainScene = GetSceneByBuildIndex(0);
             LoadScene(mainScene.buildIndex, LoadSceneMode.Single);
         }
 
-        public void LoadActivity(int id)
+
+        public void Start() => LoadData();
+
+        private void LoadData()
         {
-            LoadScene(id, LoadSceneMode.Additive);
+            sceneLoaded += SceneLoaded;
+            sceneUnloaded += SceneUnLoaded;
         }
 
-        public void UnLoadActivity(int id)
-        {
-            Scene newScene = GetSceneByBuildIndex(id);
-            UnloadScene(newScene.buildIndex);
-        }
+        public void LoadActivity(int id) => LoadScene(id, LoadSceneMode.Additive);
+
+#pragma warning disable CS0618 // Тип или член устарел
+        public void UnLoadActivity(int id) => UnloadScene(id);
+#pragma warning restore CS0618 // Тип или член устарел
 
         Activity[] AllActivities;
 
-        private void sceneLoaded(Scene scene, LoadSceneMode mode)
+        private void SceneLoaded(Scene scene, LoadSceneMode mode)
         {
             AllActivities = FindObjectsOfType<Activity>();
-            if (loadingActivityes.Count > 0)
+            if (LoadingActivityes.Count > 0)
             {
-                Activity a1 = AllActivities.FirstOrDefault(activity => activity.sceneId == loadingActivityes[loadingActivityes.Count - 1]);
+                var a1 = AllActivities.FirstOrDefault(activity => activity.SceneId == LoadingActivityes[LoadingActivityes.Count - 1]);
 
-                if (a1 != null)
-                    a1.pauseActivity();
+                if (a1 != null) a1.WaitActivity();
             }
 
-            Activity a = AllActivities.FirstOrDefault(activity => activity.sceneId == scene.buildIndex);
+            var a = AllActivities.FirstOrDefault(activity => activity.SceneId == scene.buildIndex);
 
-            if (a != null)
+            if (a)
             {
-                a.startActivity();
-                loadingActivityes.Add(scene.buildIndex);
+                a.StartActivity();
+                LoadingActivityes.Add(scene.buildIndex);
             }
-           
-            SetActiveScene(scene);
         }
 
-        private void sceneUnLoaded(Scene scene)
+        private void SceneUnLoaded(Scene scene)
         {
-            if(loadingActivityes.Count > 0)
-            {
-                loadingActivityes.Remove(scene.buildIndex);
-            }
+            if (LoadingActivityes.Count > 0) LoadingActivityes.Remove(scene.buildIndex);
 
-            Activity a = AllActivities.FirstOrDefault(activity => activity != null && loadingActivityes.Count > 0 && activity.sceneId == loadingActivityes[loadingActivityes.Count - 1] );
+            var a = AllActivities.FirstOrDefault(activity => activity != null && LoadingActivityes.Count > 0 && activity.SceneId == LoadingActivityes[LoadingActivityes.Count - 1] );
 
-            if (a != null)
-            {
-                a.playActivity();
-            }
+            if (a) a.PlayActivity();
 
             AllActivities = FindObjectsOfType<Activity>();
         }
     }
+
+    interface ISceneAction { void Action(int sceneIndex); }
 }

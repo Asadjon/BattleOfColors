@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &454174982109029082
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 454174982109029060}
+  - component: {fileID: 454174982109029061}
+  - component: {fileID: 6732176708730244025}
+  m_Layer: 0
+  m_Name: AudioSource
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &454174982109029060
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454174982109029082}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &454174982109029061
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454174982109029082}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8429951b620f7034a82f9747724267ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Sounds:
+  - m_Name: Standard button click
+    m_Clip: {fileID: 8300000, guid: a8283a29d29611948bfa494c30241929, type: 3}
+    m_Volume: 1
+    m_Pitch: 1
+    m_Mute: 0
+    m_Loop: 0
+  - m_Name: Countdown
+    m_Clip: {fileID: 8300000, guid: cb172cdcacf5074409e24ea6734622dd, type: 3}
+    m_Volume: 1
+    m_Pitch: 1
+    m_Mute: 0
+    m_Loop: 0
+  - m_Name: End countdown
+    m_Clip: {fileID: 8300000, guid: 6e326d5b8e0973549b3e2f4cc4add1b3, type: 3}
+    m_Volume: 1
+    m_Pitch: 1
+    m_Mute: 0
+    m_Loop: 0
+  - m_Name: Push
+    m_Clip: {fileID: 8300000, guid: 0e7a8c391de6124408332411f9bd8c7d, type: 3}
+    m_Volume: 1
+    m_Pitch: 1
+    m_Mute: 0
+    m_Loop: 0
+--- !u!81 &6732176708730244025
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 454174982109029082}
+  m_Enabled: 1

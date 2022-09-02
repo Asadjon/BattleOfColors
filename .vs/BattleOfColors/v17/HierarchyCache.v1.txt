@@ -1,0 +1,771 @@
+﻿++Решение "BattleOfColors" ‎(проекты: 2 из 2)
+i:{00000000-0000-0000-0000-000000000000}:BattleOfColors.sln
+++Assembly-CSharp
+i:{00000000-0000-0000-0000-000000000000}:Assembly-CSharp
+++Ссылки
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Assets
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\
+++Scripts
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\
+++Activitys
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\activitys\
+++ActivitesID.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\activitys\activitesid.cs
+++Activity.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\activitys\activity.cs
+++MenuActivity.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\activitys\menuactivity.cs
+++OptionsActivity.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\activitys\optionsactivity.cs
+++SettingsActivity.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\activitys\settingsactivity.cs
+++SingleGame.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\activitys\singlegame.cs
+++AnimControllers
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\animcontrollers\
+++Editors
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\editors\
+++GameControllers
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\gamecontrollers\
+++Players
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\players\
+++Resource
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\resource\
+++SaveGameDatas
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\savegamedatas\
+++UI
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\ui\
+++ActivityManager.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\activitymanager.cs
+++ColorChanger.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\colorchanger.cs
+++ColorGenerator.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\colorgenerator.cs
+++GameOptions.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\gameoptions.cs
+++JsonFileReader.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\jsonfilereader.cs
+++MainClass.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\mainclass.cs
+++MyStaticHelper.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\mystatichelper.cs
+++RecordHelper.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\recordhelper.cs
+++SwipeView.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\swipeview.cs
+++Transition.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\transition.cs
+++TextMesh Pro
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\
+++Assembly-CSharp-firstpass
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{00000000-0000-0000-0000-000000000000}:Assembly-CSharp-firstpass
+++DOTween
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\
+++Microsoft.Win32.Primitives
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++mscorlib
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++netstandard
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.AppContext
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Collections
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Collections.Concurrent
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Collections.NonGeneric
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Collections.Specialized
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.ComponentModel
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.ComponentModel.Composition
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.ComponentModel.EventBasedAsync
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.ComponentModel.Primitives
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.ComponentModel.TypeConverter
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Console
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Core
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Data
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Data.Common
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Diagnostics.Contracts
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Diagnostics.Debug
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Diagnostics.FileVersionInfo
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Diagnostics.Process
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Diagnostics.StackTrace
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Diagnostics.TextWriterTraceListener
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Diagnostics.Tools
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Diagnostics.TraceSource
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Diagnostics.Tracing
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Drawing
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Drawing.Primitives
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Dynamic.Runtime
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Globalization
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Globalization.Calendars
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Globalization.Extensions
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO.Compression
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO.Compression.FileSystem
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO.Compression.ZipFile
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO.FileSystem
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO.FileSystem.DriveInfo
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO.FileSystem.Primitives
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO.FileSystem.Watcher
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO.IsolatedStorage
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO.MemoryMappedFiles
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO.Pipes
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.IO.UnmanagedMemoryStream
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Linq
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Linq.Expressions
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Linq.Parallel
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Linq.Queryable
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net.Http
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net.NameResolution
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net.NetworkInformation
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net.Ping
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net.Primitives
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net.Requests
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net.Security
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net.Sockets
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net.WebHeaderCollection
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net.WebSockets
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Net.WebSockets.Client
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Numerics
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Numerics.Vectors
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.ObjectModel
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Reflection
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Reflection.Extensions
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Reflection.Primitives
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Resources.Reader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Resources.ResourceManager
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Resources.Writer
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.CompilerServices.VisualC
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.Extensions
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.Handles
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.InteropServices
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.InteropServices.RuntimeInformation
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.InteropServices.WindowsRuntime
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.Numerics
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.Serialization
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.Serialization.Formatters
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.Serialization.Json
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.Serialization.Primitives
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Runtime.Serialization.Xml
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Security.Claims
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Security.Cryptography.Algorithms
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Security.Cryptography.Csp
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Security.Cryptography.Encoding
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Security.Cryptography.Primitives
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Security.Cryptography.X509Certificates
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Security.Principal
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Security.SecureString
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.ServiceModel.Web
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Text.Encoding
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Text.Encoding.Extensions
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Text.RegularExpressions
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Threading
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Threading.Overlapped
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Threading.Tasks
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Threading.Tasks.Parallel
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Threading.Thread
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Threading.ThreadPool
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Threading.Timer
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Transactions
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.ValueTuple
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Web
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Windows
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Xml
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Xml.Linq
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Xml.ReaderWriter
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Xml.Serialization
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Xml.XDocument
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Xml.XmlDocument
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Xml.XmlSerializer
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Xml.XPath
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++System.Xml.XPath.XDocument
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.2D.Sprite.Editor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.2D.Tilemap.Editor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.RenderPipelines.Core.Editor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.RenderPipelines.Core.Runtime
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.RenderPipelines.Core.ShaderLibrary
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.RenderPipelines.ShaderGraph.ShaderGraphLibrary
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.Rider.Editor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.Searcher.Editor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.ShaderGraph.Editor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.TextMeshPro
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.TextMeshPro.Editor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.Timeline
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.Timeline.Editor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.VisualEffectGraph.Editor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.VisualEffectGraph.Runtime
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.VisualStudio.Editor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++Unity.VSCode.Editor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEditor
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEditor.iOS.Extensions.Common
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEditor.iOS.Extensions.Xcode
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEditor.UI
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.AccessibilityModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.AIModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.AndroidJNIModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.AnimationModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.ARModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.AssetBundleModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.AudioModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.ClothModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.CoreModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.CrashReportingModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.DirectorModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.DSPGraphModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.GameCenterModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.GridModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.HotReloadModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.ImageConversionModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.IMGUIModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.InputLegacyModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.InputModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.JSONSerializeModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.LocalizationModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.ParticleSystemModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.PerformanceReportingModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.Physics2DModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.PhysicsModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.ProfilerModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.ScreenCaptureModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.SharedInternalsModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.SpriteMaskModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.SpriteShapeModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.StreamingModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.SubstanceModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.SubsystemsModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.TerrainModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.TerrainPhysicsModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.TextCoreModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.TextRenderingModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.TilemapModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.TLSModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UI
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UIElementsModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UIElementsNativeModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UIModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UmbraModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UNETModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UnityAnalyticsModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UnityConnectModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UnityTestProtocolModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UnityWebRequestAssetBundleModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UnityWebRequestAudioModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UnityWebRequestModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UnityWebRequestTextureModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.UnityWebRequestWWWModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.VehiclesModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.VFXModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.VideoModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.VRModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.WindModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++UnityEngine.XRModule
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:
+++AnimController.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\animcontrollers\animcontroller.cs
+++BackgroundAnimController.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\animcontrollers\backgroundanimcontroller.cs
+++CounterAnimController.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\animcontrollers\counteranimcontroller.cs
+++GameAnimController.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\animcontrollers\gameanimcontroller.cs
+++NumberPickerEditor.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\editors\numberpickereditor.cs
+++TimerViewEditor.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\editors\timervieweditor.cs
+++GameController.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\gamecontrollers\gamecontroller.cs
+++DirectoryBoard.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\players\directoryboard.cs
+++GameBoard.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\players\gameboard.cs
+++ItemView.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\players\itemview.cs
+++Node.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\players\node.cs
+++Player.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\players\player.cs
+++TranslateAnimation.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\players\translateanimation.cs
+++ViewResource.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\resource\viewresource.cs
+++GameDataLoader.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\savegamedatas\gamedataloader.cs
+++NumberPicker.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\ui\numberpicker.cs
+++ScrollSnapRect.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\ui\scrollsnaprect.cs
+++ScrollView.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\ui\scrollview.cs
+++SecundamerView.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\ui\secundamerview.cs
+++TimerView.cs
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\scripts\ui\timerview.cs
+++Fonts
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\fonts\
+++Resources
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\
+++Sprites
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\sprites\
+++FredokaOneRegular - OFL.txt
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\fonts\fredokaoneregular - ofl.txt
+++LiberationSans - OFL.txt
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\fonts\liberationsans - ofl.txt
+++Shaders
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\
+++LineBreaking Following Characters.txt
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\linebreaking following characters.txt
+++LineBreaking Leading Characters.txt
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\linebreaking leading characters.txt
+++EmojiOne Attribution.txt
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\sprites\emojione attribution.txt
+++TMP_Bitmap-Custom-Atlas.shader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmp_bitmap-custom-atlas.shader
+++TMP_Bitmap-Mobile.shader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmp_bitmap-mobile.shader
+++TMP_Bitmap.shader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmp_bitmap.shader
+++TMP_SDF-Mobile Masking.shader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmp_sdf-mobile masking.shader
+++TMP_SDF-Mobile Overlay.shader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmp_sdf-mobile overlay.shader
+++TMP_SDF-Mobile.shader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmp_sdf-mobile.shader
+++TMP_SDF-Surface-Mobile.shader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmp_sdf-surface-mobile.shader
+++TMP_SDF-Surface.shader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmp_sdf-surface.shader
+++TMP_SDF Overlay.shader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmp_sdf overlay.shader
+++TMP_SDF.shader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmp_sdf.shader
+++TMP_Sprite.shader
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmp_sprite.shader
+++TMPro.cginc
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmpro.cginc
+++TMPro_Properties.cginc
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmpro_properties.cginc
+++TMPro_Surface.cginc
+i:{22fca15f-87db-9571-0336-87edbefd8d15}:d:\unity projects\battleofcolors\assets\textmesh pro\resources\shaders\tmpro_surface.cginc
+++Plugins
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\
+++Demigiant
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\
+++Modules
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\modules\
+++DOTween.dll
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\dotween.dll
+++DOTween.XML
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\dotween.xml
+++readme.txt
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\readme.txt
+++DOTweenModuleAudio.cs
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\modules\dotweenmoduleaudio.cs
+++DOTweenModuleEPOOutline.cs
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\modules\dotweenmoduleepooutline.cs
+++DOTweenModulePhysics.cs
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\modules\dotweenmodulephysics.cs
+++DOTweenModulePhysics2D.cs
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\modules\dotweenmodulephysics2d.cs
+++DOTweenModuleSprite.cs
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\modules\dotweenmodulesprite.cs
+++DOTweenModuleUI.cs
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\modules\dotweenmoduleui.cs
+++DOTweenModuleUnityVersion.cs
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\modules\dotweenmoduleunityversion.cs
+++DOTweenModuleUtils.cs
+i:{21686254-3a82-5b00-9f3e-33023e83bbc8}:d:\unity projects\battleofcolors\assets\plugins\demigiant\dotween\modules\dotweenmoduleutils.cs

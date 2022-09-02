@@ -1,85 +1,57 @@
-﻿using Assets.Scripts.Interface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Assets.Scripts.UI;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace Assets.Scripts.Activitys
 {
-    public abstract class Activity : MonoBehaviour
+    public class Activity : UIBehaviour
     {
-        public int sceneId { get; private set; } = 0;
+        [SerializeField] private SafeArea m_SafeArea;
+        [SerializeField] private Transition m_TransitionAnim;
 
-        public Activity() => sceneId = ActivitesID.GetId(this.GetType());
+        public static bool IsBack { get; set; } = false;
+        public int SceneId { get; private set; } = 0;
 
-        protected void Awake()
+        protected override void Awake()
         {
-            
+            base.Awake();
+            SceneId = ActivitesID.Instance.GetId(GetType());
         }
 
-        protected void OnEnable()
+        protected virtual void Update()
         {
-            
-        }
-
-        protected void Start()
-        {
-            
-        }
-
-        protected void Update()
-        {
-            // Check if Back was pressed this frame
-            if (Input.GetKeyDown(KeyCode.Escape))
+            IsBack = false;
+            if (Input.GetKeyUp(KeyCode.Escape))
             {
+                IsBack = true;
                 OnBackPressed();
             }
-            // Make sure user is on Android platform
-            if (Application.platform == RuntimePlatform.Android)
-            {
-            }
         }
 
-        protected void OnApplicationPause(bool pause)
-        {
+        public virtual void OnBackPressed() => Finish();
 
-        }
-
-        private void OnApplicationQuit()
-        {
-
-        }
-
-        protected void OnDestroy()
-        {
-
-        }
-
-        public virtual void OnBackPressed()
-        {
-            finish();
-        }
-
-        public virtual void playActivity()
+        public virtual void PlayActivity()
         {
             if (!gameObject.active) gameObject.SetActive(true);
         }
 
-        public virtual void startActivity()
-        {
+        public virtual void StartActivity() {}
 
-        }
-
-        public virtual void pauseActivity()
+        public virtual void WaitActivity()
         {
             if (gameObject.active) gameObject.SetActive(false);
         }
 
-        public virtual void finish()
+        public virtual void Finish()
         {
-            ActivityManager.GetActivityManager.UnLoadActivity(sceneId);
+            ActivityManager.GetActivityManager.UnLoadActivity(SceneId);
+        }
+
+        protected void StartTransitionAnim(int sceneId)
+        {
+            m_TransitionAnim.StartingEnd.AddListener(() => ActivityManager.GetActivityManager.LoadActivity(sceneId));
+            m_TransitionAnim.StartTransition();
         }
     }
 }
