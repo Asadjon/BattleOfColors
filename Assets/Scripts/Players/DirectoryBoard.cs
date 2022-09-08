@@ -32,9 +32,9 @@ namespace Assets.Scripts.Players
 
         #region Getters And Setters
 
-        private SerializebleVector2Int[] ItemViewsPosition
+        private SerializableVector2Int[] ItemViewsPosition
         {
-            get => mItemViews.ConvertAll(view => (SerializebleVector2Int)view.Node.PositionInTheArray).ToArray();
+            get => mItemViews.ConvertAll(view => (SerializableVector2Int)view.Node.PositionInTheArray).ToArray();
             set
             {
                 for (int i = 0; i < value.Length; i++)
@@ -178,7 +178,7 @@ namespace Assets.Scripts.Players
     [Serializable] struct MyDirectoryBoard { public SerializebleNode[] Nodes; }
     [Serializable] struct SerializationDirectoryBoard
     {
-        [SerializedMember("ItemViewsPosition")] public SerializebleVector2Int[] ItemViewsPosition;
+        [SerializedMember("ItemViewsPosition")] public SerializableVector2Int[] ItemViewsPosition;
         [SerializedMember("ViewResources")] public MyViewResource[] ViewResources;
     }
 }

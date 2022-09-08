@@ -27,7 +27,7 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
         private sbyte[][] mPattern;
         private Vector2Int mPatternIndex;
 
-        private SerializebleVector2Int PatternIndex { get => mPatternIndex; set => mPatternIndex = (Vector2Int)value; }
+        private SerializableVector2Int PatternIndex { get => mPatternIndex; set => mPatternIndex = (Vector2Int)value; }
 
         public N_PuzzleSolver() { }
         public N_PuzzleSolver(IAdapter adapter, MonoBehaviour component, sbyte[] puzzle, sbyte[] goal) : base(adapter, component, puzzle, goal) { }
@@ -169,7 +169,7 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
 
     [Serializable] class SerializebleN_PuzzleSolver : SerializeblePuzzleSolver
     {
-        [SerializedMember("PatternIndex")] public SerializebleVector2Int PatternIndex;
+        [SerializedMember("PatternIndex")] public SerializableVector2Int PatternIndex;
         [SerializedMember("mPattern")] public sbyte[][] Pattern;
         [SerializedMember("mPartOfGoal")] public sbyte[] PartOfGoal;
         [SerializedMember("mLastTarget")] public sbyte LastTarget;

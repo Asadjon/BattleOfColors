@@ -60,5 +60,5 @@ namespace Assets.Scripts.Players
         }
     }
 
-    [Serializable] struct SerializebleNode { public int ItemId; public SerializebleVector2Int Position; }
+    [Serializable] struct SerializebleNode { public int ItemId; public SerializableVector2Int Position; }
 }

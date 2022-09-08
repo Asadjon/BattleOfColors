@@ -32,13 +32,14 @@ namespace Assets.Scripts.Players
         protected GameTypes mGameType = DefaultGameType;
 
         private float mSizeOfView = default;
+        private int mMovesCount = 0;
         #endregion
 
         #region Getters And Setters
 
-        private SerializebleVector2Int[] ItemViewPosition
+        private SerializableVector2Int[] ItemViewPosition
         {
-            get => mItemViews.ConvertAll(view => (SerializebleVector2Int)view.Node.PositionInTheArray).ToArray();
+            get => mItemViews.ConvertAll(view => (SerializableVector2Int)view.Node.PositionInTheArray).ToArray();
             set
             {
                 for (int i = 0; i < value.Length; i++)
@@ -49,9 +50,9 @@ namespace Assets.Scripts.Players
             }
         }
 
-        private SerializebleVector2Int EmptyNode
+        private SerializableVector2Int EmptyNode
         {
-            get => (SerializebleVector2Int)mEmptyNode.PositionInTheArray;
+            get => (SerializableVector2Int)mEmptyNode.PositionInTheArray;
             set => (mEmptyNode = mNodes.Find(node => node.PositionInTheArray == (Vector2Int)value)).SetItemViewWithoutAnim(null);
         }
 
@@ -65,7 +66,7 @@ namespace Assets.Scripts.Players
         {
             set => mItemViews.ForEach(view => view.Resource = value[mItemViews.IndexOf(view)]);
         }
-        public UnityAction GameOver { get; set; } = default;
+        public UnityAction<int> OnGameOver { get; set; } = default;
         public Vector2 ContentPadding { get => GetComponent<RectTransform>().rect.size - (m_ContentOfItemViews ? m_ContentOfItemViews.rect.size : GetComponent<RectTransform>().rect.size); }
         public GameTypes GameType { get => mGameType; set
             {
@@ -122,11 +123,12 @@ namespace Assets.Scripts.Players
 
             mNumberOfArrays = DefaultNumberOfArrays;
             mTotalNumberOfArrays = (int)Math.Pow(mNumberOfArrays, 2f);
+            mMovesCount = 0;
         }
 
-        public void Initialize(int numberOfArrays, List<ViewResource> resources, UnityAction gameOver)
+        public void Initialize(int numberOfArrays, List<ViewResource> resources, UnityAction<int> onGameOver)
         {
-            GameOver = gameOver;
+            OnGameOver = onGameOver;
             Initialize(numberOfArrays, resources);
         }
 
@@ -205,6 +207,7 @@ namespace Assets.Scripts.Players
         protected virtual void SwitchPositionOnece(Vector2Int position)
         {
             SwitchPosition(position);
+            mMovesCount++;
             m_OnSwipeViews.Invoke();
         }
 
@@ -215,6 +218,7 @@ namespace Assets.Scripts.Players
 
             for (sbyte i = 0; i < count; i++) SwitchPosition(mEmptyNode.PositionInTheArray + dir);
 
+            mMovesCount++;
             m_OnSwipeViews.Invoke();
         }
 
@@ -234,17 +238,16 @@ namespace Assets.Scripts.Players
 
         public abstract void StartGame();
 
-        protected abstract bool CheckTheWin();
+        protected void GameOver() =>
+            OnGameOver.Invoke(mMovesCount);
 
         public virtual void Restart()
         {
             for (var i = 0; i < mItemViews.Count; i++)
-            {
-                if (mNodes[i] != mItemViews[i])
-                    mNodes[i].SetItemViewWithoutAnim(mItemViews[i]);
-            }
-
+                mNodes[i].SetItemViewWithoutAnim(mItemViews[i]);
             (mEmptyNode = mNodes[mNodes.Count - 1]).SetItemViewWithoutAnim(null);
+
+            mMovesCount = 0;
         }
 
         protected sbyte[] GetPuzzle()
@@ -262,8 +265,8 @@ namespace Assets.Scripts.Players
 
     [Serializable] internal class SerializationGameBoard 
     {
-        [SerializedMember("ItemViewPosition")] public SerializebleVector2Int[] ItemViewsPosition;
-        [SerializedMember("EmptyNode")] public SerializebleVector2Int EmptyNode;
+        [SerializedMember("ItemViewPosition")] public SerializableVector2Int[] ItemViewsPosition;
+        [SerializedMember("EmptyNode")] public SerializableVector2Int EmptyNode;
         [SerializedMember("ViewResources")] public MyViewResource[] ViewResources;
     }
 }

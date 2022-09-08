@@ -18,10 +18,10 @@ namespace Assets.Scripts.Players
         [SerializeField] private GameBoard m_GameBoard = null;
         [SerializeField] private DirectoryBoard m_DirectoryBoard = null;
         [SerializeField] private float m_Padding = 16f;
-        [SerializeField] private UnityEvent<string> m_GameOver = null;
+        [SerializeField] private UnityEvent<string, int> m_GameOver = null;
 
         public string PlayerName { get => m_PlayerName; set => m_PlayerName = value; }
-        public UnityEvent<string> OnGameOver { get => m_GameOver; }
+        public UnityEvent<string, int> OnGameOver { get => m_GameOver; }
         public GameTypes GameType
         {
             set
@@ -61,7 +61,7 @@ namespace Assets.Scripts.Players
             m_DirectoryBoard.Initialize(numberOfArrays, resources);
             m_GameBoard.Initialize(numberOfArrays,
                 ViewResource.CreateMultiple(resources),
-                () => OnGameOver.Invoke(m_PlayerName));
+                movesCount => OnGameOver.Invoke(m_PlayerName, movesCount));
         }
 
         [ContextMenu("Calculate Size")]
@@ -114,7 +114,6 @@ namespace Assets.Scripts.Players
         public void NewGame()
         {
             m_DirectoryBoard.StartShuffle();
-            var count = m_DirectoryBoard.Resources.Count;
             m_GameBoard.Resources = ViewResource.CreateMultiple(m_DirectoryBoard.Resources);
 
             m_GameBoard.Restart();

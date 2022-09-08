@@ -64,9 +64,11 @@ namespace Assets.Scripts.Activitys
             OptionsActivity.ActivityType = SceneId;
             var gameOptions = GameOptions.Instance;
 
+            m_UserPlayer.PlayerName = "User player";
             m_UserPlayer.OnGameOver.AddListener(GameOver);
             m_UserPlayer.AddSwipeAction(() => PlaySound(m_PushSoundName));
 
+            m_AIPlayer.PlayerName = "AI player";
             m_AIPlayer.OnGameOver.AddListener(GameOver);
             m_AIPlayer.AddSwipeAction(() => PlaySound(m_PushSoundName));
 
@@ -106,22 +108,17 @@ namespace Assets.Scripts.Activitys
             m_AIPlayer.StartGame();
         }
 
-        private void GameOver(string message)
+        private void GameOver(string playerName, int _)
         {
             m_SecundamerView.StopTime();
 
-            message = "Time\n" + m_SecundamerView.ToString();
-            var messageColor = Color.white;
+            var message = "You won!";
+            var messageColor = Color.green;
 
-            if (m_SecundamerView.CurrentTime.TotalMilliseconds < mRecordTime.TotalMilliseconds || mRecordTime.TotalMilliseconds == 0)
+            if (playerName == m_AIPlayer.PlayerName)
             {
-                mRecordTime = m_SecundamerView.CurrentTime;
-                RecordHelper.SaveRecord(GameOptions.Instance.NumberOfArrays,
-                new GameTime { hour = mRecordTime.Hours, minute = mRecordTime.Minutes, second = mRecordTime.Seconds },
-                GameOptions.Instance.GameType);
-
-                message = "New record\n" + m_SecundamerView.ToString();
-                messageColor = Color.green;
+                message = "You didn‘t win!";
+                messageColor = Color.red;
             }
 
             m_GameController.SetMessage(message, messageColor);

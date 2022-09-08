@@ -63,7 +63,7 @@ namespace Assets.Scripts.Players
             if (CheckTheWin()) GameOver();
         }
 
-        protected override bool CheckTheWin()
+        private bool CheckTheWin()
         {
             if (mNodes[mNodes.Count - 1] != mEmptyNode) return false;
             return GameType == GameOptions.GameTypes.WithNumber && mItemViews.TrueForAll(item => mNodes[mItemViews.IndexOf(item)].ItemView.Resource == item.Resource) ||

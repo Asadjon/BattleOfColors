@@ -86,27 +86,36 @@ namespace Assets.Scripts.Activitys
             m_Player.StartGame();
         }
 
-        private void GameOver(string message)
+        private void GameOver(string message, int movesCount)
         {
             m_SecundamerView.StopTime();
 
-            message = "Time\n" + m_SecundamerView.ToString();
+            message = "Time: " + m_SecundamerView.ToString();
             var messageColor = Color.white;
 
-            if (m_SecundamerView.CurrentTime.TotalMilliseconds < mRecordTime.TotalMilliseconds || mRecordTime.TotalMilliseconds == 0)
+            if (IsRecordValue(movesCount))
             {
-                mRecordTime = m_SecundamerView.CurrentTime;
-                RecordHelper.SaveRecord(GameOptions.Instance.NumberOfArrays,
-                new GameTime { hour = mRecordTime.Hours, minute = mRecordTime.Minutes, second = mRecordTime.Seconds },
-                GameOptions.Instance.GameType);
-
-                message = "New record\n" + m_SecundamerView.ToString();
+                message = "New record:\n" + message;
                 messageColor = Color.green;
             }
+
+            message += "\nMoves: " + movesCount;
 
             m_GameController.SetMessage(message, messageColor);
             m_GameController.GameOver();
             m_Player.PauseGame();
+        }
+
+        private bool IsRecordValue(int movesCount)
+        {
+            if (m_SecundamerView.CurrentTime.TotalMilliseconds >= mRecordTime.TotalMilliseconds && mRecordTime.TotalMilliseconds != 0) return false;
+
+            mRecordTime = m_SecundamerView.CurrentTime;
+            RecordHelper.SaveRecord(GameOptions.Instance.NumberOfArrays,
+            new GameTime { hour = mRecordTime.Hours, minute = mRecordTime.Minutes, second = mRecordTime.Seconds },
+            GameOptions.Instance.GameType);
+
+            return true;
         }
 
         public void PauseGameForSettings()

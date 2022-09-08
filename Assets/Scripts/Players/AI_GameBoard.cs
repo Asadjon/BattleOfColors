@@ -144,7 +144,7 @@ namespace Assets.Scripts.Players
                 .Initialize(this, this, mShuffledList.ToArray(), GetPuzzle()).Next();
         }
 
-        protected override bool CheckTheWin() => !mSolver.WillItBeContinued && mSolution.Count <= 0;
+        private bool CheckTheWin() => !mSolver.WillItBeContinued && mSolution.Count <= 0;
 
         protected override void OnDestroy() => StopAllCoroutines();
     }
@@ -179,7 +179,7 @@ namespace Assets.Scripts.Players
 
         public int step;
 
-        public SerializebleVector2Int moveTo;
+        public SerializableVector2Int moveTo;
 
         public byte direction;
 
@@ -187,7 +187,7 @@ namespace Assets.Scripts.Players
         {
             puzzle = path.puzzle,
             step = path.step,
-            moveTo = (SerializebleVector2Int) path.moveTo,
+            moveTo = (SerializableVector2Int) path.moveTo,
             direction = (byte)path.direction
         };
 
