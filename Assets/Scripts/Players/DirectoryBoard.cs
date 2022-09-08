@@ -1,13 +1,17 @@
-﻿using Assets.Scripts.Resource;
+﻿using Assets.Scripts.PuzzleSolvers;
+using Assets.Scripts.Resource;
+using Assets.Scripts.SaveGameDatas.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using static Assets.Scripts.GameOptions;
 
 namespace Assets.Scripts.Players
 {
-    class DirectoryBoard : MonoBehaviour
+    [Serialization(typeof(SerializationDirectoryBoard))]
+    class DirectoryBoard : UIBehaviour
     {
         #region SerializeField Objects
         [SerializeField] private ItemView m_ItemViewPrefab = null;
@@ -28,15 +32,27 @@ namespace Assets.Scripts.Players
 
         #region Getters And Setters
 
-        public static implicit operator MyDirectoryBoard(DirectoryBoard directoryBoard) =>
-            new MyDirectoryBoard { Nodes = directoryBoard.mNodes.ConvertAll(node => (SerializebleNode)node).ToArray() };
-
-        public void Set(MyDirectoryBoard myDirectoryBoard)
+        private SerializebleVector2Int[] ItemViewsPosition
         {
-            var nodes = mNodes.ToDictionary(node => node.PositionInTheArray);
-            var itemViews = mItemViews.ToDictionary(item => item.Id);
+            get => mItemViews.ConvertAll(view => (SerializebleVector2Int)view.Node.PositionInTheArray).ToArray();
+            set
+            {
+                for (int i = 0; i < value.Length; i++)
+                {
+                    var itemPosition = (Vector2Int) value[i];
+                    mNodes.Find(node => node.PositionInTheArray == itemPosition).SetItemViewWithoutAnim(mItemViews[i]);
+                }
+            }
+        }
 
-            Array.ForEach(myDirectoryBoard.Nodes, myNode => nodes[(Vector2Int)myNode.Position].SetItemViewWithoutAnim(itemViews[myNode.ItemId]));
+        private ViewResource[] ViewResources
+        {
+            get => mNodes.ConvertAll(node => node.ItemView.Resource).ToArray();
+            set
+            {
+                mResources = value.ToList();
+                mNodes.ForEach(node => node.ItemView.Resource = mResources[mNodes.IndexOf(node)]);
+            }
         }
 
         public List<ViewResource> Resources { 
@@ -129,7 +145,7 @@ namespace Assets.Scripts.Players
                 view.name = "Item " + index;
                 node.SetItemViewWithoutAnim(view);
                 view.Id = index;
-                view.Resource = mResources[node.PositionInTheArray.x];
+                if (mResources != null) view.Resource = mResources[node.PositionInTheArray.x];
                 mItemViews.Add(view);
 
                 node.ChangeChildOffset(offset);
@@ -160,4 +176,9 @@ namespace Assets.Scripts.Players
     }
 
     [Serializable] struct MyDirectoryBoard { public SerializebleNode[] Nodes; }
+    [Serializable] struct SerializationDirectoryBoard
+    {
+        [SerializedMember("ItemViewsPosition")] public SerializebleVector2Int[] ItemViewsPosition;
+        [SerializedMember("ViewResources")] public MyViewResource[] ViewResources;
+    }
 }

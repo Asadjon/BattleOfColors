@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts.PuzzleSolvers;
+using Assets.Scripts.Resource;
+using UnityEngine;
 using static Assets.Scripts.Players.ItemView;
 using static Assets.Scripts.Players.ItemView.SwipeDirection;
 
@@ -16,9 +18,9 @@ namespace Assets.Scripts.Players
             mSettings = GameSettings.Instance;
         }
 
-        protected override ItemView CreateView(int index)
+        protected override ItemView CreateView(int index, ViewResource resource)
         {
-            var view = base.CreateView(index);
+            var view = base.CreateView(index, resource);
             view.OnSwipe = this;
             return view;
         }
@@ -65,7 +67,7 @@ namespace Assets.Scripts.Players
         {
             if (mNodes[mNodes.Count - 1] != mEmptyNode) return false;
             return GameType == GameOptions.GameTypes.WithNumber && mItemViews.TrueForAll(item => mNodes[mItemViews.IndexOf(item)].ItemView.Resource == item.Resource) ||
-                   mItemViews.TrueForAll(item => mNodes[mItemViews.IndexOf(item)].ItemView.Resource.Color == item.Resource.Color);
+                   GameType == GameOptions.GameTypes.WithColor && mItemViews.TrueForAll(item => mNodes[mItemViews.IndexOf(item)].ItemView.Resource.Color == item.Resource.Color);
         }
 
         public override void PauseGame() => mPermissionToSwipe = false;
@@ -74,7 +76,7 @@ namespace Assets.Scripts.Players
 
         public override void StartGame()
         {
-            StartShuffle(GetPuzzle().ShuffleIsSolvable(GameType == GameOptions.GameTypes.WithNumber));
+            StartShuffle(GetPuzzle().Shuffle((PuzzleShuffle.ShuffleLevels)GameOptions.Instance.Level, mNumberOfArrays - GameOptions.MinNumberOfArrays));
             PlayGame();
         }
     }

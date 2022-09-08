@@ -8,10 +8,12 @@ using Assets.Scripts.SaveGameDatas;
 
 using static Assets.Scripts.GameControllers.GameController;
 using static Assets.Scripts.Activitys.MultiplayerGameActivity;
+using Assets.Scripts.SaveGameDatas.Attributes;
 
 namespace Assets.Scripts.Activitys
 {
-    class MultiplayerGameActivity : Activity, IOnGameActions, ISerialized<SerializationGame>
+    [Serialization(typeof(SerializationGame))]
+    class MultiplayerGameActivity : Activity, IOnGameActions
     {
         [SerializeField] private Player m_UserPlayer = null;
         [SerializeField] private Player m_AIPlayer = null;
@@ -19,6 +21,26 @@ namespace Assets.Scripts.Activitys
         [SerializeField] private SecundamerView m_SecundamerView = null;
         [SerializeField] private Gradient m_SecundamerGradient = null;
         [SerializeField] private string m_PushSoundName = default;
+
+        private int GameType { get => (int)GameOptions.Instance.GameType; set
+            {
+                GameOptions.Instance.GameType = (GameOptions.GameTypes)value;
+                m_UserPlayer.GameType = GameOptions.Instance.GameType;
+                m_AIPlayer.GameType = GameOptions.Instance.GameType;
+            }
+        }
+        private int NumberOfArrays
+        {
+            get => GameOptions.Instance.NumberOfArrays;
+            set
+            {
+                GameOptions.Instance.NumberOfArrays = value;
+                mRecordTime = RecordHelper.GetRecord(value, GameOptions.Instance.GameType).time;
+                m_UserPlayer.InitializeGame(value, ViewResource.GenerateResources(value));
+                m_AIPlayer.InitializeGame(value, ViewResource.GenerateResources(value));
+            }
+        }
+        private double TotalMillSec { get => m_SecundamerView.Value; set => m_SecundamerView.Value = value; }
 
         private TimeSpan mRecordTime;
 
@@ -39,31 +61,17 @@ namespace Assets.Scripts.Activitys
 
         private void LoadData()
         {
+            OptionsActivity.ActivityType = SceneId;
             var gameOptions = GameOptions.Instance;
-            var game = GetSavedData();
 
-            if (!game)
-            {
-                OptionsActivity.ActivityType = SceneId;
-                gameOptions.GameType = game.GameType;
-                gameOptions.NumberOfArrays = game.NumberOfArrays;
-            }
-
-            var resurces = ViewResource.GenerateResources(gameOptions.NumberOfArrays);
-
-            m_UserPlayer.GameType = gameOptions.GameType;
             m_UserPlayer.OnGameOver.AddListener(GameOver);
             m_UserPlayer.AddSwipeAction(() => PlaySound(m_PushSoundName));
-            m_UserPlayer.InitializeGame(gameOptions.NumberOfArrays, resurces);
 
-            m_AIPlayer.GameType = gameOptions.GameType;
             m_AIPlayer.OnGameOver.AddListener(GameOver);
             m_AIPlayer.AddSwipeAction(() => PlaySound(m_PushSoundName));
-            m_AIPlayer.InitializeGame(gameOptions.NumberOfArrays, resurces);
 
             mRecordTime = RecordHelper.GetRecord(gameOptions.NumberOfArrays, gameOptions.GameType).time;
 
-            m_SecundamerView.ResetTime();
             m_SecundamerView.TextFormat = "hh\\\n\\·\\·\\\nmm\\\n\\·\\·\\\nss";
             m_SecundamerView.OnValueChange.AddListener(time =>
                 m_SecundamerView.ChangeTextColor(
@@ -72,22 +80,24 @@ namespace Assets.Scripts.Activitys
 
             m_GameController.SetGameActions(this);
 
-            StartGame(game);
+            if (GetSavedData()) PauseGame();
+            else
+            {
+                var resurces = ViewResource.GenerateResources(gameOptions.NumberOfArrays);
+
+                m_UserPlayer.GameType = gameOptions.GameType;
+                m_UserPlayer.InitializeGame(gameOptions.NumberOfArrays, resurces);
+
+                m_AIPlayer.GameType = gameOptions.GameType;
+                m_AIPlayer.InitializeGame(gameOptions.NumberOfArrays, resurces);
+
+                m_SecundamerView.ResetTime();
+
+                m_GameController.StartGame();
+            }
         }
 
         public void PlaySound(string soundName) => AudioManager.Instance.Play(soundName);
-
-        private void StartGame(SerializationGame game)
-        {
-            if (!game)
-            {
-                m_UserPlayer.Set(game.UserPlayer);
-                m_AIPlayer.Set(game.UserPlayer);
-                m_SecundamerView.Value = game.TotalMillSec;
-                PauseGame();
-            }
-            else m_GameController.StartGame();
-        }
 
         private void StartGame()
         {
@@ -165,52 +175,29 @@ namespace Assets.Scripts.Activitys
             m_AIPlayer.PlayGame();
         }
 
-        private SerializationGame GetSavedData()
+        private bool GetSavedData()
         {
-            var data = GameDataLoader.LoadData<SerializationGame>(savedDataFileName);
+            if (!GameDataLoader.LoadData(savedDataFileName, out SerializationGame data)) return false;
+            this.SetSavedValue(data);
             GameDataLoader.DeleteData(savedDataFileName);
             GameDataLoader.DeleteData(MainClass.LastLoadedSceneId);
 
-            return data;
+            return true;
         }
 
         private void SaveGameData()
         {
-            GameDataLoader.SaveData(Serialize(default), savedDataFileName);
+            var data = this.GetSavedValue();
+            GameDataLoader.SaveData(data, savedDataFileName);
             GameDataLoader.SaveData(SceneId, MainClass.LastLoadedSceneId);
-        }
-
-        public SerializationGame Serialize(SerializationGame game) => new SerializationGame
-        {
-            GameType = GameOptions.Instance.GameType,
-            NumberOfArrays = GameOptions.Instance.NumberOfArrays,
-            UserPlayer = m_UserPlayer,
-            AIPlayer = m_AIPlayer,
-            TotalMillSec = m_SecundamerView.Value
-        };
-
-        public void Deserialize(SerializationGame game)
-        {
-            OptionsActivity.ActivityType = SceneId;
-            GameOptions.Instance.GameType = game.GameType;
-            GameOptions.Instance.NumberOfArrays = game.NumberOfArrays;
-            m_UserPlayer.Set(game.UserPlayer);
-            m_AIPlayer.Set(game.AIPlayer);
-            m_SecundamerView.Value = game.TotalMillSec;
         }
 
         private void OnApplicationPause(bool pause)
         {
             if(m_GameController.IsCountStart || m_GameController.IsGameOver) return;
 
-            else if (pause)
-            {
-                SaveGameData();
-                PauseGame();
-                return;
-            }
-            else if (GetSavedData() is SerializationGame game && !game)
-                Deserialize(game);
+            else if (pause) SaveGameData();
+            else GetSavedData();
 
             PauseGame();
         }
@@ -238,11 +225,11 @@ namespace Assets.Scripts.Activitys
         [Serializable]
         internal struct SerializationGame
         {
-            public GameOptions.GameTypes GameType;
-            public int NumberOfArrays;
-            public double TotalMillSec;
-            public SerializationPlayer UserPlayer;
-            public SerializationPlayer AIPlayer;
+            [SerializedMember("GameType")] public int GameType;
+            [SerializedMember("NumberOfArrays")] public int NumberOfArrays;
+            [SerializedMember("TotalMillSec")] public double TotalMillSec;
+            [SerializedMember("m_AIPlayer")] public SerializationPlayer AIPlayer;
+            [SerializedMember("m_UserPlayer")] public SerializationPlayer UserPlayer;
 
             public static bool operator ==(SerializationGame game1, SerializationGame game2) => game1.Equals(game2);
             public static bool operator !=(SerializationGame game1, SerializationGame game2) => !(game1 == game2);

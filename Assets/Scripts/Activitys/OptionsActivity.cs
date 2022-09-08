@@ -8,7 +8,7 @@ namespace Assets.Scripts.Activitys
 {
     public class OptionsActivity : Activity
     {
-        public static int ActivityType { get; set; } = ActivitesID.Instance.GetId<SinglePlayerGameActivity>();
+        public static int ActivityType { get; set; }
         
         [SerializeField] private NumberPicker m_NumberPicker = null;
         [SerializeField] private ToggleGroup m_GameTypes = null;

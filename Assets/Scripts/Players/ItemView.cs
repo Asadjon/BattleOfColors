@@ -7,6 +7,9 @@ using DG.Tweening;
 using static Assets.Scripts.GameSettings;
 using static Assets.Scripts.Players.ItemView.SwipeDirection;
 using static Assets.Scripts.Players.ItemView.State;
+using System;
+using Assets.Scripts.SaveGameDatas.Attributes;
+using static Assets.Scripts.GameOptions;
 
 namespace Assets.Scripts.Players
 {
@@ -25,10 +28,10 @@ namespace Assets.Scripts.Players
         private bool mIsAllowOnce = false;
         private Vector2 mTouchingPosition;
         private Vector4 mSwipingLimit;
-        private bool mIsShowText = false;
+        private GameTypes mGameType;
         public enum SwipeDirection { Default = -1, Left = 4, Top = 5, Right = 6, Bottom = 7 }
         public enum SwipeOrientation { Default = -1, Horizontal = Left | Right, Vertical = Top | Bottom }
-        public enum State { Swipe = 0, Click = 1 }
+        [Serializable] public enum State { Swipe = 0, Click = 1 }
         #endregion
 
         #region Getters And Setters
@@ -43,10 +46,10 @@ namespace Assets.Scripts.Players
                 UpdateUI();
             }
         }
-        public bool IsShowText { get => mIsShowText; 
+        public GameTypes GameType { get => mGameType; 
             set
             {
-                mIsShowText = value;
+                mGameType = value;
                 UpdateUI();
             }
         }
@@ -91,7 +94,7 @@ namespace Assets.Scripts.Players
         private void UpdateUI()
         {
             (m_TextView.enabled, m_TextView.text, m_TextView.color, m_ColorView.color) =
-                (mIsShowText, m_Resources.Text, m_Resources.TextColor, m_Resources.Color);
+                (mGameType == GameTypes.WithNumber, m_Resources.Text, m_Resources.TextColor, m_Resources.Color);
         }
 
         public void ChangeChildOffset(float offset)

@@ -43,7 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f7ececb9a2eae0341ab6408d7a36ab98, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_SettingsJsonDataPath: /GameOptions/
+  m_SettingsJsonDataPath: /game_settings/
   m_AudioVolume: 0.5
   m_DistanceOfSwiping: 7
   m_IsMute: 0

@@ -1,8 +1,10 @@
-﻿using System;
+﻿using Assets.Scripts.SaveGameDatas.Attributes;
+using System;
 using UnityEngine;
 
 namespace Assets.Scripts
 {
+    [Serialization(typeof(SerializeSettings))]
     class GameSettings : Singltone<GameSettings>
     {
 
@@ -35,41 +37,33 @@ namespace Assets.Scripts
 
         protected override void LoadData()
         {
-            JsonFileReader.CreateFile(m_SettingsJsonDataPath, mGameSettingsFileName, (SerializeSettings)this);
+            JsonFileReader.CreateFolder(m_SettingsJsonDataPath);
 
-            var optionsData = JsonFileReader.Read<SerializeSettings>(m_SettingsJsonDataPath, mGameSettingsFileName);
-            SetDatas(
-                optionsData.audioVolume,
-                optionsData.isMute,
-                optionsData.itemState);
+            if (JsonFileReader.Read(m_SettingsJsonDataPath, mGameSettingsFileName, out SerializeSettings settings))
+                this.SetSavedValue(settings);
+
+            else JsonFileReader.Write(this.GetSavedValue(), m_SettingsJsonDataPath, mGameSettingsFileName);
         }
 
-        public void SetSettingsData(float? audioVolume = null, bool? isMute = null, Players.ItemView.State? itemState = null)
+        public void SetSettingsData(float audioVolume, bool isMute, Players.ItemView.State itemState)
         {
             SetDatas(audioVolume, isMute, itemState);
-            JsonFileReader.Write((SerializeSettings)this, m_SettingsJsonDataPath, mGameSettingsFileName);
+            JsonFileReader.Write(this.GetSavedValue(), m_SettingsJsonDataPath, mGameSettingsFileName);
             AudioManager.Instance.UpdateSounds();
         }
 
-        private void SetDatas(float? audioVolume, bool? isMute, Players.ItemView.State? itemState)
+        private void SetDatas(float audioVolume, bool isMute, Players.ItemView.State itemState)
         {
-            if (audioVolume != null) AudioVolume = (float)audioVolume;
-            if (isMute != null) IsMute = (bool)isMute;
-            if (itemState != null) ItemState = (Players.ItemView.State)itemState;
+            AudioVolume = audioVolume;
+            IsMute = isMute;
+            ItemState = itemState;
         }
     }
 
     [Serializable] struct SerializeSettings
     {
-        public float audioVolume;
-        public bool isMute;
-        public Players.ItemView.State itemState;
-
-        public static implicit operator SerializeSettings(GameSettings settings) => new SerializeSettings
-        {
-            audioVolume = settings.AudioVolume,
-            isMute = settings.IsMute,
-            itemState = settings.ItemState,
-        };
+        [SerializedMember("AudioVolume")] public float audioVolume;
+        [SerializedMember("IsMute")] public bool isMute;
+        [SerializedMember("ItemState")] public Players.ItemView.State itemState;
     }
 }

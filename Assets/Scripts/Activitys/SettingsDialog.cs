@@ -13,15 +13,13 @@ namespace Assets.Scripts.Activitys
         [SerializeField] private Toggle m_IsMute = null;
         [SerializeField] private Toggle m_IsSwipe = null;
         [SerializeField] private Toggle m_IsClick = null;
-        [SerializeField] private Button m_Save = null;
-        [SerializeField] private Button m_Cancel = null;
         [SerializeField] private string m_SoundName = string.Empty;
 
         private State mItemState = State.Swipe;
 
-        protected override void Awake()
+        protected override void Start()
         {
-            base.Awake();
+            base.Start();
             LoadData();
         }
 
@@ -40,11 +38,9 @@ namespace Assets.Scripts.Activitys
 
             m_IsSwipe.onValueChanged.AddListener(value => { mItemState = value ? State.Swipe : mItemState; PlaySound(m_SoundName); });
             m_IsClick.onValueChanged.AddListener(value => { mItemState = value ? State.Click : mItemState; PlaySound(m_SoundName); });
-            m_Save.onClick.AddListener(() => OnClickButton(true));
-            m_Cancel.onClick.AddListener(() => OnClickButton(false));
         }
 
-        private void OnClickButton(bool isSaveButton)
+        public void OnClickButton(bool isSaveButton)
         {
             PlaySound(m_SoundName);
             ShowIs(false);

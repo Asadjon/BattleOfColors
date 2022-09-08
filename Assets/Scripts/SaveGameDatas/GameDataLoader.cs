@@ -1,12 +1,11 @@
 ﻿using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-using UnityEngine;
 
 namespace Assets.Scripts.SaveGameDatas
 {
     public static class GameDataLoader
     {
-        public static readonly string Path = MainClass.DatasPath + "/GameDatas/";
+        public static readonly string Path = MainClass.DatasPath + "/saved_game_datas/";
 
         public static void Initialize()
         {
@@ -16,23 +15,22 @@ namespace Assets.Scripts.SaveGameDatas
 
         public static void SaveData<T> (this T data, string fileName)
         {
-            var stream = new FileStream(Path + fileName, FileMode.Create);
+            var stream = new FileStream(Path + fileName, FileMode.OpenOrCreate);
 
             new BinaryFormatter().Serialize(stream, data);
             stream.Close();
         }
 
-        public static T LoadData<T>(string fileName, T defaultValue = default)
+        public static bool LoadData<T>(string fileName, out T outputValue)
         {
-            if (File.Exists(Path + fileName))
-            {
-                var stream = new FileStream(Path + fileName, FileMode.Open);
+            outputValue = default;
+            if (!File.Exists(Path + fileName)) return false;
 
-                var data = (T)new BinaryFormatter().Deserialize(stream);
-                stream.Close();
-                return data;
-            }
-            return defaultValue;
+            var stream = File.OpenRead(Path + fileName);
+
+            outputValue = (T)new BinaryFormatter().Deserialize(stream);
+            stream.Close();
+            return true;
         }
 
         public static void DeleteData(string fileName)

@@ -1,4 +1,5 @@
 ﻿using Assets.Scripts.Resource;
+using Assets.Scripts.SaveGameDatas.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ using static UnityEngine.Vector2;
 
 namespace Assets.Scripts.Players
 {
-    [ExecuteInEditMode]
+    [ExecuteInEditMode, Serialization(typeof(SerializationPlayer))]
     class Player : UIBehaviour
     {
         [SerializeField] private string m_PlayerName = "Player";
@@ -19,36 +20,13 @@ namespace Assets.Scripts.Players
         [SerializeField] private float m_Padding = 16f;
         [SerializeField] private UnityEvent<string> m_GameOver = null;
 
-        public static implicit operator SerializationPlayer(Player player) => new SerializationPlayer
-        {
-            PlayerName = player.m_PlayerName,
-            GameBoard = player.m_GameBoard.Implicit(),
-            DirectoryBoard = player.m_DirectoryBoard,
-            Resources = player.m_DirectoryBoard.Resources.ConvertAll(res => (MyViewResource) res).ToArray()
-        };
-
-        public Player Set(SerializationPlayer myPlayer)
-        {
-            m_PlayerName = myPlayer.PlayerName;
-            m_GameBoard.Set(myPlayer.GameBoard);
-            m_DirectoryBoard.Set(myPlayer.DirectoryBoard);
-
-            var resources = myPlayer.Resources.ToList().ConvertAll(res => (ViewResource) res);
-            m_DirectoryBoard.Resources = resources;
-
-            var count = m_DirectoryBoard.Resources.Count;
-            m_GameBoard.Resources = ViewResource.CreateMultiple(resources, MyStaticHelper.ChangeViewResource);
-
-            return this;
-        }
-
         public string PlayerName { get => m_PlayerName; set => m_PlayerName = value; }
         public UnityEvent<string> OnGameOver { get => m_GameOver; }
         public GameTypes GameType
         {
             set
             {
-                if (m_DirectoryBoard) m_GameBoard.GameType = value;
+                if (m_GameBoard) m_GameBoard.GameType = value;
             }
         }
 
@@ -66,7 +44,6 @@ namespace Assets.Scripts.Players
         private void InitializeGame()
         {
             var numberOfArray = GameOptions.Instance ? GameOptions.Instance.NumberOfArrays : DefaultNumberOfArrays;
-            var withText = GameOptions.Instance ? GameOptions.Instance.GameType : DefaultGameType;
 
             CalculateSize(numberOfArray);
 
@@ -74,7 +51,7 @@ namespace Assets.Scripts.Players
 
             m_DirectoryBoard.LoadDataPreview(numberOfArray, resources);
             m_GameBoard.LoadDataPreview(numberOfArray,
-                ViewResource.CreateMultiple(resources, MyStaticHelper.ChangeViewResource));
+                ViewResource.CreateMultiple(resources));
         }
 
         public void InitializeGame(int numberOfArrays, List<ViewResource> resources)
@@ -83,7 +60,7 @@ namespace Assets.Scripts.Players
 
             m_DirectoryBoard.Initialize(numberOfArrays, resources);
             m_GameBoard.Initialize(numberOfArrays,
-                ViewResource.CreateMultiple(resources, MyStaticHelper.ChangeViewResource),
+                ViewResource.CreateMultiple(resources),
                 () => OnGameOver.Invoke(m_PlayerName));
         }
 
@@ -138,7 +115,7 @@ namespace Assets.Scripts.Players
         {
             m_DirectoryBoard.StartShuffle();
             var count = m_DirectoryBoard.Resources.Count;
-            m_GameBoard.Resources = ViewResource.CreateMultiple(m_DirectoryBoard.Resources, MyStaticHelper.ChangeViewResource);
+            m_GameBoard.Resources = ViewResource.CreateMultiple(m_DirectoryBoard.Resources);
 
             m_GameBoard.Restart();
         }
@@ -146,9 +123,8 @@ namespace Assets.Scripts.Players
 
     [Serializable] struct SerializationPlayer
     {
-        public string PlayerName;
-        public SerializationGameBoard GameBoard;
-        public MyDirectoryBoard DirectoryBoard;
-        public MyViewResource[] Resources;
+        [SerializedMember("m_PlayerName")] public string PlayerName;
+        [SerializedMember("m_DirectoryBoard")] public SerializationDirectoryBoard DirectoryBoard;
+        [SerializedMember("m_GameBoard")] public SerializationGameBoard GameBoard;
     }
 }

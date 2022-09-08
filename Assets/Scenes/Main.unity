@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52024e518f609bc4fbb63d528605a577, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_RecordsFilePath: /JsonFiles/
+  m_RecordsFilePath: /json_files/
 --- !u!4 &175942659
 Transform:
   m_ObjectHideFlags: 0
@@ -162,7 +162,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 175942657}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -3403.625}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -371,11 +371,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: GameOptions
       objectReference: {fileID: 0}
-    - target: {fileID: 8405330158758678368, guid: 8d1bbcd127fe0d24cbb4790de33a5e86,
-        type: 3}
-      propertyPath: m_NumberOfArrays
-      value: 3
-      objectReference: {fileID: 0}
     - target: {fileID: 8405330158758678369, guid: 8d1bbcd127fe0d24cbb4790de33a5e86,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -431,8 +426,7 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 625868323930995428, guid: 8d1bbcd127fe0d24cbb4790de33a5e86, type: 3}
+    m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8d1bbcd127fe0d24cbb4790de33a5e86, type: 3}
 --- !u!1001 &8471201084583075884
 PrefabInstance:
@@ -441,6 +435,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3206930735396680431, guid: 381944ebe509d5a4287706c9429913a8,
+        type: 3}
+      propertyPath: m_SettingsJsonDataPath
+      value: /
+      objectReference: {fileID: 0}
     - target: {fileID: 5803858237253666452, guid: 381944ebe509d5a4287706c9429913a8,
         type: 3}
       propertyPath: m_Name

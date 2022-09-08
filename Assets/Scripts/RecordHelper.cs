@@ -14,16 +14,20 @@ namespace Assets.Scripts
 
         public static void Initialize(string filePath)
         {
-            var record1 = new List<Record>();
-            for (var i = MinNumberOfArrays; i <= MaxNumberOfArrays; i++)
-                record1.Add(new Record() { numberOfArrays = i });
+            JsonFileReader.CreateFolder(RecordHelper.filePath = filePath);
 
-            var record2 = new List<Record>();
-            for (var i = MinNumberOfArrays; i <= MaxNumberOfArrays; i++)
-                record2.Add(new Record() { numberOfArrays = i });
+            if (!JsonFileReader.Read(filePath, fileName, out Records))
+            {
+                var record1 = new List<Record>();
+                for (var i = MinNumberOfArrays; i <= MaxNumberOfArrays; i++)
+                    record1.Add(new Record() { numberOfArrays = i });
 
-            JsonFileReader.CreateFile(RecordHelper.filePath = filePath, fileName, new Records { recordsWithNumber = record1, recordsWithColor = record2 });
-            Records = JsonFileReader.Read<Records>(filePath, fileName);
+                var record2 = new List<Record>();
+                for (var i = MinNumberOfArrays; i <= MaxNumberOfArrays; i++)
+                    record2.Add(new Record() { numberOfArrays = i });
+
+                Records = new Records { recordsWithNumber = record1, recordsWithColor = record2 };
+            }
         }
 
         public static void SaveRecord(int numberOfArrays, GameTime recordTime, GameTypes isWithNumber)

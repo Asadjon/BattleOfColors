@@ -19,7 +19,7 @@ namespace Assets.Scripts
 #elif UNITY_ANDROID
                 "/data/data/com." + Application.companyName + "." + Application.productName
 #endif
-                + "/GameDatas";
+                + "/game_datas";
             ActivityManager.NewInstanse();
             RecordHelper.Initialize(m_RecordsFilePath);
             GameDataLoader.Initialize();
@@ -30,7 +30,7 @@ namespace Assets.Scripts
             ActivityManager.GetActivityManager.Start();
 
             ActivityManager.GetActivityManager.LoadActivity(
-                GameDataLoader.LoadData(LastLoadedSceneId, ActivitesID.Instance.GetId<MenuActivity>()));
+                GameDataLoader.LoadData(LastLoadedSceneId, out int sceneId) ? sceneId : ActivitesID.Instance.GetId<MenuActivity>());
         }
     }
 }

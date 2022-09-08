@@ -1,32 +1,35 @@
 ﻿using System.IO;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Assets.Scripts
 {
     public static class JsonFileReader
     {
-        public static void CreateFile<T>(string filePath, string fileName, T obj = default)
+        public static void CreateFolder(string filePath)
         {
-            if(!Directory.Exists(MainClass.DatasPath + filePath))
+            if (!Directory.Exists(MainClass.DatasPath + filePath))
                 Directory.CreateDirectory(MainClass.DatasPath + filePath);
-
-            if (File.Exists(MainClass.DatasPath + filePath + fileName)) return;
-
-            File.Create(MainClass.DatasPath + filePath + fileName).Close();
-            Write(obj, filePath, fileName);
         }
 
-        public static T Read<T>(string filePath, string fileName)
+        public static bool Read<T>(string filePath, string fileName, out T outputObject)
         {
-            var text = File.ReadAllText(MainClass.DatasPath + filePath + fileName);
-            return JsonUtility.FromJson<T>(text);
+            var path = MainClass.DatasPath + filePath + fileName;
+
+            outputObject = default;
+            if (!File.Exists(path)) return false;
+
+            outputObject = JsonUtility.FromJson<T>(File.ReadAllText(path));
+            return true;
         }
 
         public static void Write<T>(T obj, string filePath, string fileName)
         {
-            var text = JsonUtility.ToJson(obj);
-            File.WriteAllText(MainClass.DatasPath + filePath + fileName, text);
+            var path = MainClass.DatasPath + filePath + fileName;
+
+            if (!File.Exists(path))
+                new FileStream(path, FileMode.Create, FileAccess.ReadWrite).Close();
+
+            File.WriteAllText(path, JsonUtility.ToJson(obj));
         }
     }
 }

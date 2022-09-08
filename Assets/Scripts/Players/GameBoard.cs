@@ -5,11 +5,12 @@ using UnityEngine.Events;
 
 using static Assets.Scripts.GameOptions;
 using Assets.Scripts.Resource;
-using System.Linq;
 using UnityEngine.EventSystems;
+using Assets.Scripts.SaveGameDatas.Attributes;
 
 namespace Assets.Scripts.Players
 {
+    [Serialization(typeof(SerializationGameBoard))]
     abstract class GameBoard : UIBehaviour
     {
         #region SerializeField Objects
@@ -28,50 +29,50 @@ namespace Assets.Scripts.Players
         protected readonly List<Node> mNodes = new List<Node>();
         protected int mNumberOfArrays = default;
         protected int mTotalNumberOfArrays = default;
-        protected List<ViewResource> mResources = new List<ViewResource>();
+        protected GameTypes mGameType = DefaultGameType;
 
         private float mSizeOfView = default;
         #endregion
 
         #region Getters And Setters
 
-        public virtual SerializationGameBoard Implicit()
+        private SerializebleVector2Int[] ItemViewPosition
         {
-            var myGameBoard = CreateMyGameBoard();
-            myGameBoard.EmptyNode = mEmptyNode;
-            myGameBoard.Nodes = mNodes.ConvertAll(node => (SerializebleNode)node).ToArray();
-            return myGameBoard;
+            get => mItemViews.ConvertAll(view => (SerializebleVector2Int)view.Node.PositionInTheArray).ToArray();
+            set
+            {
+                for (int i = 0; i < value.Length; i++)
+                {
+                    var nodePosition = (Vector2Int)value[i];
+                    mNodes.Find(node => node.PositionInTheArray == nodePosition).SetItemViewWithoutAnim(mItemViews[i]);
+                }
+            }
         }
 
-        protected virtual SerializationGameBoard CreateMyGameBoard() => new SerializationGameBoard();
-
-        public virtual GameBoard Set(SerializationGameBoard myGameBoard)
+        private SerializebleVector2Int EmptyNode
         {
-            var nodes = mNodes.ToDictionary(node => node.PositionInTheArray);
-            var itemViews = mItemViews.ToDictionary(item => item.Id);
+            get => (SerializebleVector2Int)mEmptyNode.PositionInTheArray;
+            set => (mEmptyNode = mNodes.Find(node => node.PositionInTheArray == (Vector2Int)value)).SetItemViewWithoutAnim(null);
+        }
 
-            mEmptyNode = nodes[(Vector2Int) myGameBoard.EmptyNode.Position];
-            mEmptyNode.SetItemViewWithoutAnim(null);
-
-            Array.ForEach(myGameBoard.Nodes, myNode => {
-                if (nodes[(Vector2Int) myNode.Position] == mEmptyNode) return;
-                nodes[(Vector2Int)myNode.Position].SetItemViewWithoutAnim(itemViews[myNode.ItemId]);
-            });
-
-            return this;
+        private ViewResource[] ViewResources
+        {
+            get => mItemViews.ConvertAll(view => view.Resource).ToArray();
+            set => mItemViews.ForEach(view => view.Resource = value[mItemViews.IndexOf(view)]);
         }
 
         public List<ViewResource> Resources
         {
-            set
-            {
-                mResources = value;
-                mItemViews.ForEach(view => view.Resource = mResources[mItemViews.IndexOf(view)]);
-            }
+            set => mItemViews.ForEach(view => view.Resource = value[mItemViews.IndexOf(view)]);
         }
         public UnityAction GameOver { get; set; } = default;
         public Vector2 ContentPadding { get => GetComponent<RectTransform>().rect.size - (m_ContentOfItemViews ? m_ContentOfItemViews.rect.size : GetComponent<RectTransform>().rect.size); }
-        public GameTypes GameType { get; set; } = DefaultGameType;
+        public GameTypes GameType { get => mGameType; set
+            {
+                mGameType = value;
+                mItemViews.ForEach(view => view.GameType = mGameType);
+            }
+        }
         public UnityEvent OnSwipeViews { get => m_OnSwipeViews; set => m_OnSwipeViews = value; }
         #endregion
 
@@ -121,7 +122,6 @@ namespace Assets.Scripts.Players
 
             mNumberOfArrays = DefaultNumberOfArrays;
             mTotalNumberOfArrays = (int)Math.Pow(mNumberOfArrays, 2f);
-            GameType = DefaultGameType;
         }
 
         public void Initialize(int numberOfArrays, List<ViewResource> resources, UnityAction gameOver)
@@ -134,7 +134,6 @@ namespace Assets.Scripts.Players
         {
             mNumberOfArrays = numberOfArrays;
             mTotalNumberOfArrays = (int) Mathf.Pow(mNumberOfArrays, 2);
-            mResources = resources;
             mSizeOfView = m_ContentOfNodes.GetComponent<RectTransform>().rect.size.x / mNumberOfArrays;
             m_ContentOfNodes.sizeDelta = m_ContentOfItemViews.sizeDelta;
             m_ContentOfNodes.anchoredPosition = m_ContentOfItemViews.anchoredPosition;
@@ -145,7 +144,7 @@ namespace Assets.Scripts.Players
             Array.ForEach(m_ContentOfItemViews.GetComponentsInChildren<ItemView>(), view => DestroyImmediate(view.gameObject));
             mItemViews.Clear();
 
-            CreateViews();
+            CreateViews(resources);
         }
 
         private void InitPositions()
@@ -170,14 +169,15 @@ namespace Assets.Scripts.Players
             mEmptyNode = mNodes[mNodes.Count - 1];
         }
 
-        protected virtual void CreateViews()
+        protected virtual void CreateViews(List<ViewResource> resources)
         {
             var offset = Mathf.Lerp(m_MaxPadding, m_MinPadding, (mNumberOfArrays - MinNumberOfArrays) / (MaxNumberOfArrays - MinNumberOfArrays));
             mNodes.ForEach(node =>
             {
                 if (node != mEmptyNode)
                 {
-                    var view = CreateView(mNodes.IndexOf(node));
+                    var index = mNodes.IndexOf(node);
+                    var view = CreateView(index, resources?[index]);
                     node.SetItemViewWithoutAnim(view);
                     mItemViews.Add(view);
                 }
@@ -185,14 +185,14 @@ namespace Assets.Scripts.Players
             });
         }
 
-        protected virtual ItemView CreateView(int index)
+        protected virtual ItemView CreateView(int index, ViewResource resource)
         {
             var view = Instantiate(m_ItemViewPrefab, m_ContentOfItemViews);
 
             view.name = "Item " + index;
             view.Id = index;
-            view.Resource = mResources[index];
-            view.IsShowText = GameType == GameTypes.WithNumber;
+            if (resource != null) view.Resource = resource;
+            view.GameType = GameType;
             return view;
         }
 
@@ -218,9 +218,9 @@ namespace Assets.Scripts.Players
             m_OnSwipeViews.Invoke();
         }
 
-        protected virtual void StartShuffle(List<sbyte> shuffledList)
+        protected virtual void StartShuffle(sbyte[] shuffledList)
         {
-            for (var i = 0; i < shuffledList.Count; i++)
+            for (var i = 0; i < shuffledList.Length; i++)
 
                 if (shuffledList[i] != 0)
                     mNodes[i].SetItemViewWithAnim(mItemViews.Find(view => view.Resource.Id == shuffledList[i]));
@@ -260,5 +260,10 @@ namespace Assets.Scripts.Players
         }
     }
 
-    [Serializable] internal class SerializationGameBoard { public SerializebleNode[] Nodes; public SerializebleNode EmptyNode; }
+    [Serializable] internal class SerializationGameBoard 
+    {
+        [SerializedMember("ItemViewPosition")] public SerializebleVector2Int[] ItemViewsPosition;
+        [SerializedMember("EmptyNode")] public SerializebleVector2Int EmptyNode;
+        [SerializedMember("ViewResources")] public MyViewResource[] ViewResources;
+    }
 }

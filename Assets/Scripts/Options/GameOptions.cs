@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Events;
 
 namespace Assets.Scripts
@@ -9,7 +10,9 @@ namespace Assets.Scripts
         public enum GameTypes { WithColor = 0, WithNumber = 1 }
 
         #region Constantas
-        private static readonly (float, float)[] Levels = new (float, float)[] { (1f, 1.5f), (.5f, .75f), (.25f, .375f), (.125f, .1875f) };
+        private static readonly Dictionary<GameLevels, (float, float)> Levels = new Dictionary<GameLevels, (float, float)>
+        { { GameLevels.Easy, (1f, 1.5f) }, { GameLevels.Normal, (.5f, .75f) }, { GameLevels.Hard, (.25f, .375f) }, { GameLevels.Expert, (.125f, .1875f) } };
+
         public const int DefaultNumberOfArrays = 3;
         public const int MinNumberOfArrays = 3;
         public const int MaxNumberOfArrays = 8;
@@ -34,7 +37,7 @@ namespace Assets.Scripts
         public GameLevels Level { get => m_Level; set
             {
                 m_Level = value;
-                mLevelValue = Levels[(int)m_Level];
+                mLevelValue = Levels[m_Level];
             }
         }
         #endregion

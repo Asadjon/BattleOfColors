@@ -1,50 +1,58 @@
 ﻿using Assets.Scripts.PuzzleSolvers;
 using Assets.Scripts.PuzzleSolvers.SolverClasses;
+using Assets.Scripts.Resource;
+using Assets.Scripts.SaveGameDatas.Attributes;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.Players
 {
+    [Serialization(typeof(SerializationAI_GameBoard))]
     sealed class AI_GameBoard : GameBoard, IAdapter
     {
+        [SerializeField] private (float min, float max) m_LevelSwipeTime;
+
         private sbyte[] mFifteenGoalState;
         private PuzzleSolver mSolver;
         private List<Path> mSolution;
         private bool mIsRun;
-        private List<sbyte> mShuffledList;
+        private sbyte[] mShuffledList;
         private GameSettings mSettings;
-        private GameOptions mOptions;
 
         private float mItemSwipeTime = 0;
         private float mCurrentTime = 0;
 
-        [SerializeField] private (float min, float max) m_LevelSwipeTime;
-
-        protected override SerializationGameBoard CreateMyGameBoard() => new SerializationAI_GameBoard
+        private int SolverType
         {
-            SolverType = SerializationAI_GameBoard.GetEnumType(mSolver),
-            Solver = mSolver.Implicit(),
-            Solution = mSolution.ConvertAll(p => (SerializePath)p),
-            Level = mOptions.Level
-        };
+            get => SerializationAI_GameBoard.GetEnumType(mSolver);
+            set
+            {
+                StopAllCoroutines();
+                (mSolver = PuzzleSolver.NewInstate(SerializationAI_GameBoard.GetPuzzleType(value)))
+                    .Initialize(this, this);
+            }
+        }
 
-        public override GameBoard Set(SerializationGameBoard myGameBoard)
+        private int Level
         {
-            base.Set(myGameBoard);
+            get => (int)GameOptions.Instance.Level;
+            set
+            {
+                GameOptions.Instance.Level = (GameOptions.GameLevels)value;
+                m_LevelSwipeTime = GameOptions.Instance.GetLevelValue;
+            }
+        }
 
-            if (!(myGameBoard is SerializationAI_GameBoard gameBoard)) return this;
-
-            StopAllCoroutines();
-            mSolution = gameBoard.Solution.ConvertAll(p => (Path)p);
-            (mSolver = PuzzleSolver.NewInstate(SerializationAI_GameBoard.GetPuzzleType(gameBoard.SolverType)))
-                .Initialize(this, this).Set(gameBoard.Solver).Next();
-
-            mOptions.Level = gameBoard.Level;
-            m_LevelSwipeTime = mOptions.GetLevelValue;
-            mItemSwipeTime = GetSwipeTime();
-
-            return this;
+        private SerializePath[] Solution
+        {
+            get => mSolution.ConvertAll(p => (SerializePath)p).ToArray();
+            set
+            {
+                mSolution = value.ToList().ConvertAll(p => (Path)p);
+                mSolver.Next();
+            }
         }
 
         protected override void LoadData()
@@ -52,14 +60,13 @@ namespace Assets.Scripts.Players
             base.LoadData();
             mSolution = new List<Path>();
             mSettings = GameSettings.Instance;
-            mOptions = GameOptions.Instance;
             m_LevelSwipeTime = GameOptions.Instance.GetLevelValue;
             mItemSwipeTime = GetSwipeTime();
         }
 
-        protected override void CreateViews()
+        protected override void CreateViews(List<ViewResource> resources)
         {
-            base.CreateViews();
+            base.CreateViews(resources);
             mFifteenGoalState = GetPuzzle();
             RestartGame();
         }
@@ -132,7 +139,7 @@ namespace Assets.Scripts.Players
         private void RestartGame()
         {
             mSolution.Clear();
-            mShuffledList = mFifteenGoalState.ShuffleIsSolvable(GameType == GameOptions.GameTypes.WithNumber);
+            mShuffledList = mFifteenGoalState.Shuffle((PuzzleShuffle.ShuffleLevels)Level, mNumberOfArrays - GameOptions.MinNumberOfArrays);
             (mSolver = PuzzleSolver.NewInstate(GameType == GameOptions.GameTypes.WithNumber ? typeof(N_PuzzleSolver) : typeof(Color_PuzzleSolver)))
                 .Initialize(this, this, mShuffledList.ToArray(), GetPuzzle()).Next();
         }
@@ -145,24 +152,22 @@ namespace Assets.Scripts.Players
     [Serializable]
     sealed class SerializationAI_GameBoard : SerializationGameBoard
     {
-        public enum PuzzleSolverType { N_Solver, Color_Solver }
+        [SerializedMember("SolverType")] public int SolverType;
+        [SerializedMember("mSolver")] public SerializeblePuzzleSolver Solver;
+        [SerializedMember("Solution")] public SerializePath[] Solution;
+        [SerializedMember("Level")] public int Level;
 
-        public PuzzleSolverType SolverType;
-        public SerializeblePuzzleSolver Solver;
-        public List<SerializePath> Solution;
-        public GameOptions.GameLevels Level;
-
-        public static PuzzleSolverType GetEnumType<T>(T solver) where T : PuzzleSolver
+        public static int GetEnumType<T>(T solver) where T : PuzzleSolver
         {
-            if (solver is N_PuzzleSolver) return PuzzleSolverType.N_Solver;
-            else if (solver is Color_PuzzleSolver) return PuzzleSolverType.Color_Solver;
+            if (solver is N_PuzzleSolver) return 0;
+            else if (solver is Color_PuzzleSolver) return 1;
             else throw new TypeAccessException();
         }
 
-        public static Type GetPuzzleType(PuzzleSolverType solverType)
+        public static Type GetPuzzleType(int solverType)
         {
-            if (solverType == PuzzleSolverType.N_Solver) return typeof(N_PuzzleSolver);
-            else if (solverType == PuzzleSolverType.Color_Solver) return typeof(Color_PuzzleSolver);
+            if (solverType == 0) return typeof(N_PuzzleSolver);
+            else if (solverType == 1) return typeof(Color_PuzzleSolver);
             else throw new TypeAccessException();
         }
     }
@@ -174,7 +179,7 @@ namespace Assets.Scripts.Players
 
         public int step;
 
-        public SerializebleVector2 moveTo;
+        public SerializebleVector2Int moveTo;
 
         public byte direction;
 
@@ -182,7 +187,7 @@ namespace Assets.Scripts.Players
         {
             puzzle = path.puzzle,
             step = path.step,
-            moveTo = (SerializebleVector2) path.moveTo,
+            moveTo = (SerializebleVector2Int) path.moveTo,
             direction = (byte)path.direction
         };
 
