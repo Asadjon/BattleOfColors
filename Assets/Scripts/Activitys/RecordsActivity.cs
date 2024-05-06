@@ -1,56 +1,77 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using Assets.Scripts.UI;
+using Assets.Scripts.Custom;
+using static Assets.Scripts.GameOptions;
+using Assets.Scripts.Records;
+using UnityEngine.UI;
+using Assets.Scripts.AudioManagers;
 
 namespace Assets.Scripts.Activitys
 {
     class RecordsActivity : Activity
     {
-        [SerializeField] private Transform m_WithNumbers;
-        [SerializeField] private Transform m_WithColors;
+        [SerializeField] private ToggleGroupForEnum<GameTypes> m_GameTypes;
+        [SerializeField] private ToggleGroupForEnum<GameLevels> m_GameLevels;
+        [SerializeField] private SerializableDictionary<SizesOfSquare, ItemRecordData> m_ItemRecords;
+        [SerializeField] private Button m_BackButton;
+        [SerializeField] private string m_ButtonSounName;
 
-        private readonly List<TMPro.TextMeshProUGUI> mNumbers = new List<TMPro.TextMeshProUGUI>();
-        private readonly List<TMPro.TextMeshProUGUI> mColors = new List<TMPro.TextMeshProUGUI>();
+        private RecordController mRecordController;
+        private GameTypes mSelectedGameType = DefaultGameType;
+        private GameLevels mSelectedGameLevel = DefaultGameLevel;
 
-        [ContextMenu("Init")]
-        public void Init()
+        public override void OnCreate(Bundle bundle)
         {
-            mNumbers.Clear();
-            mColors.Clear();
-
-            mNumbers.AddRange(m_WithNumbers.GetComponentsInChildren<TMPro.TextMeshProUGUI>());
-            mColors.AddRange(m_WithColors.GetComponentsInChildren<TMPro.TextMeshProUGUI>());
+            mRecordController = RecordController.Instance;
         }
 
-        protected override void Awake()
+        protected override void Start()
         {
-            base.Awake();
-            Init();
+            base.Start();
 
-            mNumbers.ForEach(num =>
+            { if (m_GameTypes.Toggles.TryGetValue(mSelectedGameType, out ToggleForEnum<GameTypes> toggle) && toggle) toggle.isOn = true; }
+            { if (m_GameLevels.Toggles.TryGetValue(mSelectedGameLevel, out ToggleForEnum<GameLevels> toggle) && toggle) toggle.isOn = true; }
+
+            m_GameTypes.OnChangeEnumValue.AddListener(gameType =>
             {
-                var rec = RecordHelper.GetRecord(mNumbers.IndexOf(num) + 3, GameOptions.GameTypes.WithNumber);
-                num.text = rec.numberOfArrays + " arrays: " + ((TimeSpan) rec.time).ToString(@"hh\:mm\:ss");
+                mSelectedGameType = gameType;
+                ShowData();
+                PlaySound(m_ButtonSounName);
             });
 
-            mColors.ForEach(col =>
+            m_GameLevels.OnChangeEnumValue.AddListener(gameLevel =>
             {
-                var rec = RecordHelper.GetRecord(mColors.IndexOf(col) + 3, GameOptions.GameTypes.WithColor);
-                col.text = rec.numberOfArrays + " arrays: " + ((TimeSpan)rec.time).ToString(@"hh\:mm\:ss");
+                mSelectedGameLevel = gameLevel;
+                ShowData();
+                PlaySound(m_ButtonSounName);
             });
+
+            m_BackButton.onClick.AddListener(() => {
+                OnBackPressed();
+                PlaySound(m_ButtonSounName);
+            });
+
+            ShowData();
         }
+
+        private void ShowData()
+        {
+            foreach (SizesOfSquare size in typeof(SizesOfSquare).GetEnumValues())
+                if (m_ItemRecords.TryGetValue(size, out ItemRecordData itemRecord) && itemRecord)
+                    itemRecord.SetData(mRecordController[mSelectedGameType][size][mSelectedGameLevel]);
+        }
+
         public void PlaySound(string soundName) => AudioManager.Instance.Play(soundName);
 
         #region Activites actions
 
-        public override void OnBackPressed() =>
-            StartTransitionAnim(ActivitesID.Instance.GetId<MenuActivity>());
+        //public override void OnBackPressed() =>
+        //    StartActivity<MenuActivity>();
 
-        public override void StartActivity() =>
+        public override void OnPlay() =>
             Screen.orientation = ScreenOrientation.Portrait;
 
-        public override void WaitActivity() => Finish();
+        //public override void OnPause() => Finish();
 
         #endregion
     }

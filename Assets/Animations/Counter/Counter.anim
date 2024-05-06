@@ -1282,9 +1282,10 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0
-    functionName: PlayCountdownSound
+    functionName: PlaySound
     data: 
-    objectReferenceParameter: {fileID: 0}
+    objectReferenceParameter: {fileID: -2259875337518694652, guid: 425d86ec20bf5754d8ee6af2097fbeed,
+      type: 2}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
@@ -1296,23 +1297,26 @@ AnimationClip:
     intParameter: 0
     messageOptions: 0
   - time: 1
-    functionName: PlayCountdownSound
+    functionName: PlaySound
     data: 
-    objectReferenceParameter: {fileID: 0}
+    objectReferenceParameter: {fileID: -2259875337518694652, guid: 425d86ec20bf5754d8ee6af2097fbeed,
+      type: 2}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
   - time: 2
-    functionName: PlayCountdownSound
+    functionName: PlaySound
     data: 
-    objectReferenceParameter: {fileID: 0}
+    objectReferenceParameter: {fileID: -2259875337518694652, guid: 425d86ec20bf5754d8ee6af2097fbeed,
+      type: 2}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0
   - time: 2.6666667
-    functionName: PlayEndCountdownSound
+    functionName: PlaySound
     data: 
-    objectReferenceParameter: {fileID: 0}
+    objectReferenceParameter: {fileID: 6181951557373204465, guid: 425d86ec20bf5754d8ee6af2097fbeed,
+      type: 2}
     floatParameter: 0
     intParameter: 0
     messageOptions: 0

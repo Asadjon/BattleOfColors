@@ -7,8 +7,12 @@ using Assets.Scripts.GameControllers;
 using Assets.Scripts.SaveGameDatas;
 
 using static Assets.Scripts.GameControllers.GameController;
-using static Assets.Scripts.Activitys.MultiplayerGameActivity;
 using Assets.Scripts.SaveGameDatas.Attributes;
+using static Assets.Scripts.GameOptions;
+using Assets.Scripts.Records;
+using System.Collections.Generic;
+using Assets.Scripts.PuzzleSolvers;
+using Assets.Scripts.AudioManagers;
 
 namespace Assets.Scripts.Activitys
 {
@@ -22,29 +26,17 @@ namespace Assets.Scripts.Activitys
         [SerializeField] private Gradient m_SecundamerGradient = null;
         [SerializeField] private string m_PushSoundName = default;
 
-        private int GameType { get => (int)GameOptions.Instance.GameType; set
-            {
-                GameOptions.Instance.GameType = (GameOptions.GameTypes)value;
-                m_UserPlayer.GameType = GameOptions.Instance.GameType;
-                m_AIPlayer.GameType = GameOptions.Instance.GameType;
-            }
-        }
-        private int NumberOfArrays
+        private List<ViewResource> mResources = null;
+        protected sbyte[] mGoalState;
+        //protected sbyte[] mShuffledList;
+
+        private RecordData mRecordData => GameOptions.Instance.RecordData;
+
+        private const string savedDataFileName = "MultiGame.dat";
+
+        public override void OnCreate(Bundle bundle)
         {
-            get => GameOptions.Instance.NumberOfArrays;
-            set
-            {
-                GameOptions.Instance.NumberOfArrays = value;
-                mRecordTime = RecordHelper.GetRecord(value, GameOptions.Instance.GameType).time;
-                m_UserPlayer.InitializeGame(value, ViewResource.GenerateResources(value));
-                m_AIPlayer.InitializeGame(value, ViewResource.GenerateResources(value));
-            }
         }
-        private double TotalMillSec { get => m_SecundamerView.Value; set => m_SecundamerView.Value = value; }
-
-        private TimeSpan mRecordTime;
-
-        private const string savedDataFileName = "PlayGame.dat";
 
         protected override void Start()
         {
@@ -55,48 +47,49 @@ namespace Assets.Scripts.Activitys
         protected override void OnRectTransformDimensionsChange()
         {
             base.OnRectTransformDimensionsChange();
-            m_UserPlayer.CalculateSize(GameOptions.Instance.NumberOfArrays);
-            m_AIPlayer.CalculateSize(GameOptions.Instance.NumberOfArrays);
+            m_UserPlayer.CalculateSize((int)GameOptions.Instance.SizeOfSquar);
+            m_AIPlayer.CalculateSize((int)GameOptions.Instance.SizeOfSquar);
         }
 
         private void LoadData()
         {
-            OptionsActivity.ActivityType = SceneId;
-            var gameOptions = GameOptions.Instance;
-
-            m_UserPlayer.PlayerName = "User player";
             m_UserPlayer.OnGameOver.AddListener(GameOver);
-            m_UserPlayer.AddSwipeAction(() => PlaySound(m_PushSoundName));
+            m_UserPlayer.AddSwipeAction(_ => PlaySound(m_PushSoundName));
 
-            m_AIPlayer.PlayerName = "AI player";
             m_AIPlayer.OnGameOver.AddListener(GameOver);
-            m_AIPlayer.AddSwipeAction(() => PlaySound(m_PushSoundName));
-
-            mRecordTime = RecordHelper.GetRecord(gameOptions.NumberOfArrays, gameOptions.GameType).time;
-
-            m_SecundamerView.TextFormat = "hh\\\n\\·\\·\\\nmm\\\n\\·\\·\\\nss";
-            m_SecundamerView.OnValueChange.AddListener(time =>
-                m_SecundamerView.ChangeTextColor(
-                    m_SecundamerGradient.Evaluate(
-                        Mathf.Clamp(mRecordTime.TotalMilliseconds != 0 ? (float)(time.TotalMilliseconds / mRecordTime.TotalMilliseconds) : 0, 0, 1))));
+            //m_AIPlayer.AddSwipeAction(_ => PlaySound(m_PushSoundName));
 
             m_GameController.SetGameActions(this);
 
-            if (GetSavedData()) PauseGame();
+            m_SecundamerView.TextFormat = /*hh\\\n\\·\\·\\\n*/"mm\\\n\\·\\·\\\nss";
+            m_SecundamerView.Inverse = true;
+
+            var isSaveDataReset = GetSavedData();
+            var gameOptions = GameOptions.Instance;
+
+            mGoalState = gameOptions.GoalState;
+            sbyte[] shuffleState = null;
+
+            if (isSaveDataReset) PauseGame();
             else
             {
-                var resurces = ViewResource.GenerateResources(gameOptions.NumberOfArrays);
-
-                m_UserPlayer.GameType = gameOptions.GameType;
-                m_UserPlayer.InitializeGame(gameOptions.NumberOfArrays, resurces);
-
-                m_AIPlayer.GameType = gameOptions.GameType;
-                m_AIPlayer.InitializeGame(gameOptions.NumberOfArrays, resurces);
-
+                mResources = ((int)gameOptions.SizeOfSquar).GenerateResources();
+                m_SecundamerView.MaxTime = TimeSpan.FromSeconds((double)mRecordData.GetAverage(RecordData.Parametrs.Time));
                 m_SecundamerView.ResetTime();
-
                 m_GameController.StartGame();
+
+                shuffleState = Shuffle();
             }
+
+            m_UserPlayer.InitializeGame(mGoalState, gameOptions.SizeOfSquar, gameOptions.GameType, gameOptions.GameLevel);
+            m_AIPlayer.InitializeGame(mGoalState, gameOptions.SizeOfSquar, gameOptions.GameType, gameOptions.GameLevel);
+
+            m_UserPlayer.NewGame(mResources, shuffleState);
+            m_AIPlayer.NewGame(mResources, shuffleState);
+
+            m_SecundamerView.OnValueChange.AddListener(time =>
+                m_SecundamerView.TextColor = m_SecundamerGradient.Evaluate(1f - Mathf.Clamp(mRecordData.Sum != 0 ? (float)(time.TotalMilliseconds / mRecordData.RecordTime.TotalMilliseconds) : 0, 0, 1)));
+            m_SecundamerView.OnValueLimited.AddListener(_ => GameOver(null));
         }
 
         public void PlaySound(string soundName) => AudioManager.Instance.Play(soundName);
@@ -108,23 +101,23 @@ namespace Assets.Scripts.Activitys
             m_AIPlayer.StartGame();
         }
 
-        private void GameOver(string playerName, int _)
+        private void GameOver(Player player)
         {
+            if (m_GameController.IsGameOver) return;
+
             m_SecundamerView.StopTime();
 
-            var message = "You won!";
-            var messageColor = Color.green;
+            var message = "<color=white>Game over!</color>";
 
-            if (playerName == m_AIPlayer.PlayerName)
-            {
-                message = "You didn‘t win!";
-                messageColor = Color.red;
-            }
+            if (player == m_UserPlayer)
+                message = "<color=green>You won!</color>";
+            else if (player == m_AIPlayer)
+                message = "<color=red>You didn‘t win!</color>";
 
-            m_GameController.SetMessage(message, messageColor);
+            m_GameController.SetMessage(message);
             m_GameController.GameOver();
-            m_UserPlayer.PauseGame();
-            m_AIPlayer.PauseGame();
+            m_UserPlayer.StopGame();
+            m_AIPlayer.StopGame();
         }
 
         public void PauseGameForSettings()
@@ -142,10 +135,19 @@ namespace Assets.Scripts.Activitys
 
         private void NewGame()
         {
-            m_SecundamerView.ChangeTextColor(m_SecundamerGradient.Evaluate(0));
+            m_SecundamerView.MaxTime = TimeSpan.FromSeconds((double)mRecordData.GetAverage(RecordData.Parametrs.Time));
             m_SecundamerView.ResetTime();
-            m_UserPlayer.NewGame();
-            m_AIPlayer.NewGame();
+
+            var shuffle = Shuffle();
+            m_UserPlayer.NewGame(mResources, shuffle);
+            m_AIPlayer.NewGame(mResources, shuffle);
+        }
+
+        public sbyte[] Shuffle()
+        { 
+            mResources = mResources?.Shuffle();
+            return mGoalState.Shuffle(GameOptions.Instance.GameLevel,
+                Array.FindIndex((SizesOfSquare[])typeof(SizesOfSquare).GetEnumValues(), size => size == GameOptions.Instance.SizeOfSquar));
         }
 
         void IOnGameActions.OnStartCount() { }
@@ -161,7 +163,7 @@ namespace Assets.Scripts.Activitys
 
         void IOnGameActions.OnNextGame() { }
 
-        void IOnGameActions.OnCloseGame() => StartTransitionAnim(ActivitesID.Instance.GetId<OptionsActivity>());
+        void IOnGameActions.OnCloseGame() => Finish();
 
         public void OnResumeGame()
         {
@@ -172,21 +174,28 @@ namespace Assets.Scripts.Activitys
             m_AIPlayer.PlayGame();
         }
 
+        public static bool TryGetSavedData(out SerializationGame data) =>
+            GameDataLoader.LoadData(savedDataFileName, out data);
+
         private bool GetSavedData()
         {
-            if (!GameDataLoader.LoadData(savedDataFileName, out SerializationGame data)) return false;
-            this.SetSavedValue(data);
+            if (!TryGetSavedData(out SerializationGame data)) return false;
+            try
+            { this.SetSavedValue(data); }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return false;
+            }
             GameDataLoader.DeleteData(savedDataFileName);
-            GameDataLoader.DeleteData(MainClass.LastLoadedSceneId);
 
             return true;
         }
 
         private void SaveGameData()
         {
-            var data = this.GetSavedValue();
-            GameDataLoader.SaveData(data, savedDataFileName);
-            GameDataLoader.SaveData(SceneId, MainClass.LastLoadedSceneId);
+            if (GameDataLoader.LoadData<SerializationGame>(savedDataFileName, out _)) return;
+            GameDataLoader.SaveData(this.GetSavedValue(), savedDataFileName);
         }
 
         private void OnApplicationPause(bool pause)
@@ -208,44 +217,35 @@ namespace Assets.Scripts.Activitys
 #endif
 
         #region Activites actions
-        public override void StartActivity() => Screen.orientation = ScreenOrientation.Landscape;
+        public override void OnPlay() => Screen.orientation = ScreenOrientation.LandscapeLeft;
 
         public override void OnBackPressed()
         {
             if (m_GameController.IsCountStart || m_GameController.IsGameOver) return;
             PauseGame();
         }
-
-        public override void WaitActivity() => Finish();
         #endregion
+
+        #region Serialize game datas
+
+        private GameLevels GameLevel { get => GameOptions.Instance.GameLevel; set => GameOptions.Instance.GameLevel = value; }
+        private GameTypes GameType { get => GameOptions.Instance.GameType; set => GameOptions.Instance.GameType = value; }
+        private SizesOfSquare SizeOfSquare { get => GameOptions.Instance.SizeOfSquar; set => GameOptions.Instance.SizeOfSquar = value; }
+        private TimeSpan CurrentTime { get => m_SecundamerView.CurrentTime; set => m_SecundamerView.CurrentTime = value; }
+        private DisplayedTimeSpan MaxTime { get => m_SecundamerView.MaxTime; set => m_SecundamerView.MaxTime = (TimeSpan)value; }
 
         [Serializable]
         internal struct SerializationGame
         {
-            [SerializedMember("GameType")] public int GameType;
-            [SerializedMember("NumberOfArrays")] public int NumberOfArrays;
-            [SerializedMember("TotalMillSec")] public double TotalMillSec;
+            [SerializedMember("GameType")] public GameTypes GameType;
+            [SerializedMember("GameLevel")] public GameLevels GameLevel;
+            [SerializedMember("SizeOfSquare")] public SizesOfSquare SizeOfSquare;
+            [SerializedMember("CurrentTime")] public TimeSpan CurrentTime;
+            [SerializedMember("MaxTime")] public DisplayedTimeSpan MaxTime;
+            [SerializedMember("mResources")] public List<MyViewResource> Resources;
             [SerializedMember("m_AIPlayer")] public SerializationPlayer AIPlayer;
             [SerializedMember("m_UserPlayer")] public SerializationPlayer UserPlayer;
-
-            public static bool operator ==(SerializationGame game1, SerializationGame game2) => game1.Equals(game2);
-            public static bool operator !=(SerializationGame game1, SerializationGame game2) => !(game1 == game2);
-            public static bool operator !(SerializationGame game) => game != default;
-            public static bool operator true(SerializationGame game) => game == default;
-            public static bool operator false(SerializationGame game) => game != default;
-
-            public override bool Equals(object obj)
-            {
-                if (obj == null || !(obj is SerializationGame game)) return false;
-                else if (base.Equals(obj)) return true;
-
-                return
-                    game.GameType == GameType &&
-                    game.NumberOfArrays == NumberOfArrays &&
-                    game.TotalMillSec == TotalMillSec &&
-                    game.UserPlayer.Equals(UserPlayer) &&
-                    game.AIPlayer.Equals(AIPlayer);
-            }
         }
+        #endregion
     }
 }

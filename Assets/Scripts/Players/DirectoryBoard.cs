@@ -25,38 +25,22 @@ namespace Assets.Scripts.Players
         #region Local Objects
         private readonly List<ItemView> mItemViews = new List<ItemView>();
         protected List<Node> mNodes = new List<Node>();
-        private int mNumberOfArrays = default;
+        private SizesOfSquare mSizeOfSquare = DefaultSizeOfSquare;
         private float mSizeOfView = default;
         private List<ViewResource> mResources = new List<ViewResource>();
         #endregion
 
         #region Getters And Setters
 
-        private SerializableVector2Int[] ItemViewsPosition
+        private List<Vector2Int> mSavedItemViewsPositions = null;
+        private List<SerializableVector2Int> ItemViewsPosition
         {
-            get => mItemViews.ConvertAll(view => (SerializableVector2Int)view.Node.PositionInTheArray).ToArray();
-            set
-            {
-                for (int i = 0; i < value.Length; i++)
-                {
-                    var itemPosition = (Vector2Int) value[i];
-                    mNodes.Find(node => node.PositionInTheArray == itemPosition).SetItemViewWithoutAnim(mItemViews[i]);
-                }
-            }
-        }
-
-        private ViewResource[] ViewResources
-        {
-            get => mNodes.ConvertAll(node => node.ItemView.Resource).ToArray();
-            set
-            {
-                mResources = value.ToList();
-                mNodes.ForEach(node => node.ItemView.Resource = mResources[mNodes.IndexOf(node)]);
-            }
+            get => mItemViews.ConvertAll(view => (SerializableVector2Int)view.Node.PositionInTheArray);
+            set => mSavedItemViewsPositions = value.ToList().ConvertAll(pos => (Vector2Int)pos);
         }
 
         public List<ViewResource> Resources { 
-            get => mNodes.ConvertAll(node => node.ItemView.Resource);
+            get => mResources;
             set
             {
                 mResources = value;
@@ -66,21 +50,13 @@ namespace Assets.Scripts.Players
         public Vector2 ContentPadding { get => GetComponent<RectTransform>().rect.size - (m_ContentOfItemViews ? m_ContentOfItemViews.rect.size : GetComponent<RectTransform>().rect.size); }
         #endregion
 
-        private void Awake() => LoadData();
-
-        [ContextMenu("Initialize")]
-        public void LoadDataPreview()
-        {
-            var numberOfArray = FindObjectOfType<GameOptions>() is GameOptions gameOptions ? gameOptions.NumberOfArrays : DefaultNumberOfArrays;
-            LoadData();
-            Initialize(numberOfArray, ViewResource.GenerateResources(numberOfArray));
-        }
+        protected override void Awake() => LoadData();
 
         [ContextMenu("Calculate size")]
         public void CaluclateSize()
         {
-            mNumberOfArrays = FindObjectOfType<GameOptions>() is GameOptions gameOptions ? gameOptions.NumberOfArrays : DefaultNumberOfArrays;
-            ChangeSize(m_ContentOfNodes.GetComponent<RectTransform>().rect.size.x / mNumberOfArrays);
+            mSizeOfSquare = FindObjectOfType<GameOptions>() is GameOptions gameOptions ? gameOptions.SizeOfSquar : DefaultSizeOfSquare;
+            ChangeSize(m_ContentOfNodes.GetComponent<RectTransform>().rect.size.x / (int)mSizeOfSquare);
         }
 
         public void ChangeSize(float sizeOfView)
@@ -97,24 +73,30 @@ namespace Assets.Scripts.Players
             mItemViews.ForEach(item => item.ChangePosition());
         }
 
-        public void LoadDataPreview(int numberOfArrays, List<ViewResource> resources)
+        [ContextMenu("Initialize")]
+        public void LoadDataPreview()
+        {
+            var sizeOfSquare = FindObjectOfType<GameOptions>() is GameOptions gameOptions ? gameOptions.SizeOfSquar : DefaultSizeOfSquare;
+            LoadDataPreview(sizeOfSquare);
+        }
+
+        public void LoadDataPreview(SizesOfSquare sizeOfSquare)
         {
             LoadData();
-            Initialize(numberOfArrays, resources);
+            Initialize(sizeOfSquare);
         }
 
         private void LoadData()
         {
             if (!m_ContentOfItemViews) m_ContentOfItemViews = (RectTransform) transform;
 
-            mNumberOfArrays = DefaultNumberOfArrays;
+            mSizeOfSquare = DefaultSizeOfSquare;
         }
 
-        public void Initialize(int numberOfArrays, List<ViewResource> resources)
+        public void Initialize(SizesOfSquare sizeOfSquare)
         {
-            mNumberOfArrays = numberOfArrays;
-            mResources = resources;
-            mSizeOfView = m_ContentOfNodes.GetComponent<RectTransform>().rect.size.x / numberOfArrays;
+            mSizeOfSquare = sizeOfSquare;
+            mSizeOfView = m_ContentOfNodes.GetComponent<RectTransform>().rect.size.x / (int)sizeOfSquare;
             m_ContentOfNodes.sizeDelta = m_ContentOfItemViews.sizeDelta;
             m_ContentOfNodes.anchoredPosition = m_ContentOfItemViews.anchoredPosition;
 
@@ -123,7 +105,7 @@ namespace Assets.Scripts.Players
 
         private void CreateViews()
         {
-            for (var i = 0; i < mNumberOfArrays; i++)
+            for (var i = 0; i < (int)mSizeOfSquare; i++)
             {
                 var pos = Vector2Int.right * i;
 
@@ -136,7 +118,7 @@ namespace Assets.Scripts.Players
                 mNodes.Add(node);
             }
 
-            var offset = Mathf.Lerp(m_MaxPadding, m_MinPadding, (mNumberOfArrays - MinNumberOfArrays) / (MaxNumberOfArrays - MinNumberOfArrays));
+            var offset = Mathf.Lerp(m_MaxPadding, m_MinPadding, (mSizeOfSquare - MinSizeOfSquare) / (MaxSizeOfSquare - MinSizeOfSquare));
             mNodes.ForEach(node =>
             {
                 var view = Instantiate(m_ItemViewPrefab, m_ContentOfItemViews);
@@ -145,17 +127,18 @@ namespace Assets.Scripts.Players
                 view.name = "Item " + index;
                 node.SetItemViewWithoutAnim(view);
                 view.Id = index;
-                if (mResources != null) view.Resource = mResources[node.PositionInTheArray.x];
+                view.GameType = GameTypes.WithColor;
                 mItemViews.Add(view);
 
                 node.ChangeChildOffset(offset);
             });
-        }
 
-        public void StartShuffle()
-        {
-            var i = 0;
-            mNodes.Shuffle().ForEach(node => node.SetItemViewWithAnim(mItemViews[i++]));
+            if (mSavedItemViewsPositions != null) for (int i = 0; i < mSavedItemViewsPositions.Count; i++)
+                {
+                    var savPos = mSavedItemViewsPositions[i];
+                    mNodes.Find(node => node.PositionInTheArray == savPos).SetItemViewWithoutAnim(mItemViews[i]);
+                }
+            mSavedItemViewsPositions = null;
         }
 
         public void NotifyViews()
@@ -178,7 +161,6 @@ namespace Assets.Scripts.Players
     [Serializable] struct MyDirectoryBoard { public SerializebleNode[] Nodes; }
     [Serializable] struct SerializationDirectoryBoard
     {
-        [SerializedMember("ItemViewsPosition")] public SerializableVector2Int[] ItemViewsPosition;
-        [SerializedMember("ViewResources")] public MyViewResource[] ViewResources;
+        [SerializedMember("ItemViewsPosition")] public List<SerializableVector2Int> ItemViewsPosition;
     }
 }

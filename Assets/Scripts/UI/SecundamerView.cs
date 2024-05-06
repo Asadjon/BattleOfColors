@@ -6,25 +6,44 @@ using UnityEngine.EventSystems;
 
 namespace Assets.Scripts.UI
 {
-    class SecundamerView : UIBehaviour
+    class SecundamerView : UIBehaviour, ISerializationCallbackReceiver
     {
         [SerializeField] private TextMeshProUGUI m_Text = null;
-        [SerializeField] private double m_SecondValue = 0f;
+        [SerializeField] private DisplayedTimeSpan m_MaxTime = TimeSpan.FromDays(365f);
+        [SerializeField] private bool m_Inverse = false;
         [SerializeField] private float m_Speed = 1f;
         [SerializeField] UnityEvent<TimeSpan> m_OnValueChange = null;
+        [SerializeField] UnityEvent<TimeSpan> m_OnValueLimited = null;
 
         private string mTextFormat = "hh\\:mm\\:ss";
         private bool mIsStarted = true;
         private TimeSpan mCurrenTime;
+        private TimeSpan mMaxTime;
+        private float mSpeed = 1f;
 
         public bool IsStarted => mIsStarted;
-        public TimeSpan CurrentTime => mCurrenTime;
-        public double Value { get => m_SecondValue; set { m_SecondValue = value; UpdateUI(); } }
-        public float Speed { get => m_Speed; set => m_Speed = value; }
+        public bool Inverse { get => m_Inverse; set { m_Inverse = value; Speed = m_Speed; } }
+        public TimeSpan CurrentTime { get => mCurrenTime; set { mCurrenTime = value; UpdateUI(); } }
+        public TimeSpan MaxTime { get => mMaxTime; set => mMaxTime = value; }
+        public float Speed
+        {
+            get => m_Speed; 
+            set 
+            {
+                m_Speed = Mathf.Clamp(value, 0, value);
+                mSpeed = m_Speed * (m_Inverse ? -1 : 1);
+            }
+        }
 
         public string TextFormat { get => mTextFormat; set => mTextFormat = value; }
         public UnityEvent<TimeSpan> OnValueChange { get => m_OnValueChange; set => m_OnValueChange = value; }
+        public UnityEvent<TimeSpan> OnValueLimited { get => m_OnValueLimited; set => m_OnValueLimited = value; }
 
+        protected override void Awake()
+        {
+            base.Awake();
+            mMaxTime = (TimeSpan) m_MaxTime;
+        }
 
         public void StartTime() => mIsStarted = false;
 
@@ -32,11 +51,16 @@ namespace Assets.Scripts.UI
 
         public void ResetTime()
         {
-            m_SecondValue = 0f;
-            UpdataTime();
+            CurrentTime = m_Inverse ? mMaxTime : TimeSpan.Zero;
+            UpdateUI();
+            m_OnValueChange.Invoke(mCurrenTime);
         }
 
-        public void ChangeTextColor(Color newColor) { if(m_Text) m_Text.color = newColor; }
+        public Color TextColor
+        {
+            get { if (m_Text) return m_Text.color; else return Color.white; }
+            set { if (m_Text) m_Text.color = value; }
+        }
 
 
         private void Update()
@@ -46,16 +70,22 @@ namespace Assets.Scripts.UI
 
         private void UpdateUI()
         {
-            if (TimeSpan.FromSeconds(m_SecondValue) is TimeSpan newTime && newTime.Seconds != mCurrenTime.Seconds)
-            {
-                if (m_Text) m_Text.text = newTime.ToString(mTextFormat)/*string.Format(m_TextFormat, newTime.Hours, newTime.Minutes, newTime.Seconds)*/;
-                m_OnValueChange.Invoke(mCurrenTime = newTime);
-            }
+            if (m_Text) m_Text.text = mCurrenTime.ToString(mTextFormat);
         }
 
         private void UpdataTime()
         {
-            m_SecondValue += Time.deltaTime * m_Speed;
+            mCurrenTime = TimeSpan.FromSeconds(mCurrenTime.TotalSeconds + Time.deltaTime * mSpeed);
+
+            if (m_Inverse ? mCurrenTime <= TimeSpan.Zero : mCurrenTime >= mMaxTime)
+            {
+                mCurrenTime = mMaxTime;
+                StopTime();
+                m_OnValueLimited.Invoke(mCurrenTime);
+            }
+
+            m_OnValueChange.Invoke(mCurrenTime);
+
             UpdateUI();
         }
 
@@ -63,5 +93,36 @@ namespace Assets.Scripts.UI
         {
             return mCurrenTime.ToString(@"hh\:mm\:ss");
         }
+
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+            mMaxTime = (TimeSpan)m_MaxTime;
+            m_MaxTime = mMaxTime;
+            Speed = m_Speed;
+        }
+
+        void ISerializationCallbackReceiver.OnAfterDeserialize() { }
+    }
+
+    [Serializable]
+    public struct DisplayedTimeSpan
+    {
+        public int Days;
+        public int Hours;
+        public int Minutes;
+        public int Seconds;
+        public int MilliSeconds;
+
+        public static implicit operator DisplayedTimeSpan(TimeSpan timeSpan) => new DisplayedTimeSpan
+        {
+            Days = timeSpan.Days,
+            Hours = timeSpan.Hours,
+            Minutes = timeSpan.Minutes,
+            Seconds = timeSpan.Seconds,
+            MilliSeconds = timeSpan.Milliseconds
+        };
+
+        public static explicit operator TimeSpan(DisplayedTimeSpan timeSpan) => new TimeSpan
+            (timeSpan.Days, timeSpan.Hours, timeSpan.Minutes, timeSpan.Seconds, timeSpan.MilliSeconds);
     }
 }

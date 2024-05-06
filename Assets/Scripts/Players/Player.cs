@@ -2,7 +2,6 @@
 using Assets.Scripts.SaveGameDatas.Attributes;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -14,59 +13,55 @@ namespace Assets.Scripts.Players
     [ExecuteInEditMode, Serialization(typeof(SerializationPlayer))]
     class Player : UIBehaviour
     {
-        [SerializeField] private string m_PlayerName = "Player";
         [SerializeField] private GameBoard m_GameBoard = null;
         [SerializeField] private DirectoryBoard m_DirectoryBoard = null;
         [SerializeField] private float m_Padding = 16f;
-        [SerializeField] private UnityEvent<string, int> m_GameOver = null;
+        [SerializeField] private UnityEvent<Player> m_GameOver = null;
 
-        public string PlayerName { get => m_PlayerName; set => m_PlayerName = value; }
-        public UnityEvent<string, int> OnGameOver { get => m_GameOver; }
-        public GameTypes GameType
-        {
-            set
+        public UnityEvent<Player> OnGameOver => m_GameOver;
+        public GameTypes GameType { set 
             {
                 if (m_GameBoard) m_GameBoard.GameType = value;
             }
         }
+        public GameLevels GameLevel { set { if (m_GameBoard) m_GameBoard.GameLevel = value; } }
+        public int MovesCount => m_GameBoard.MovesCount;
 
-
-#if UNITY_EDITOR
-        private UnityAction<int> mOnChange;
-        private void Update()
+        private List<ViewResource> mResources = new List<ViewResource>();
+        public List<ViewResource> Resources
         {
-            if (mOnChange == null)
-                GameOptions.Instance.OnChangeNumberOfArrays.AddListener(mOnChange = asd => InitializeGame());
+            get => mResources;
+            set
+            {
+                mResources = value;
+                m_DirectoryBoard.Resources = mResources;
+                m_GameBoard.Resources = mResources.CreateMultiple();
+            }
         }
-#endif
 
         [ContextMenu("Initialize Game")]
         private void InitializeGame()
         {
-            var numberOfArray = GameOptions.Instance ? GameOptions.Instance.NumberOfArrays : DefaultNumberOfArrays;
+            var sizeOfSquare = GameOptions.Instance ? GameOptions.Instance.SizeOfSquar : DefaultSizeOfSquare;
 
-            CalculateSize(numberOfArray);
+            CalculateSize((int)sizeOfSquare);
 
-            var resources = ViewResource.GenerateResources(numberOfArray);
-
-            m_DirectoryBoard.LoadDataPreview(numberOfArray, resources);
-            m_GameBoard.LoadDataPreview(numberOfArray,
-                ViewResource.CreateMultiple(resources));
+            m_DirectoryBoard.LoadDataPreview(sizeOfSquare);
+            m_GameBoard.LoadDataPreview(sizeOfSquare);
         }
 
-        public void InitializeGame(int numberOfArrays, List<ViewResource> resources)
+        public void InitializeGame(sbyte[] goalState, SizesOfSquare sizeOfSquare = DefaultSizeOfSquare, GameTypes gameType = DefaultGameType, GameLevels gameLevel = DefaultGameLevel)
         {
-            CalculateSize(numberOfArrays);
+            CalculateSize(sizeOfSquare.Value());
 
-            m_DirectoryBoard.Initialize(numberOfArrays, resources);
-            m_GameBoard.Initialize(numberOfArrays,
-                ViewResource.CreateMultiple(resources),
-                movesCount => OnGameOver.Invoke(m_PlayerName, movesCount));
+            m_DirectoryBoard.Initialize(sizeOfSquare);
+            m_GameBoard.Initialize(sizeOfSquare, gameType, gameLevel, goalState);
+            m_GameBoard.OnGameOver = movesCount => OnGameOver.Invoke(this);
         }
 
         [ContextMenu("Calculate Size")]
         private void CalculateSize() =>
-            CalculateSize(FindObjectOfType<GameOptions>() is GameOptions gameOptions ? gameOptions.NumberOfArrays : DefaultNumberOfArrays);
+            CalculateSize(FindObjectOfType<GameOptions>() is GameOptions gameOptions ? (int)gameOptions.SizeOfSquar : (int)DefaultSizeOfSquare);
 
         public void CalculateSize(int count)
         {
@@ -99,30 +94,27 @@ namespace Assets.Scripts.Players
             m_DirectoryBoard.ChangeSize(viewSize);
         }
 
-        public void AddSwipeAction(UnityAction action) =>
+        public void AddSwipeAction(UnityAction<int> action) =>
             m_GameBoard.OnSwipeViews.AddListener(action);
 
-        public void StartGame()
-        {
+        public void StartGame() =>
             m_GameBoard.StartGame();
-        }
 
         public void PlayGame() => m_GameBoard.PlayGame();
 
         public void PauseGame() => m_GameBoard.PauseGame();
 
-        public void NewGame()
-        {
-            m_DirectoryBoard.StartShuffle();
-            m_GameBoard.Resources = ViewResource.CreateMultiple(m_DirectoryBoard.Resources);
+        public void StopGame() => m_GameBoard.StopGame();
 
-            m_GameBoard.Restart();
+        public void NewGame(List<ViewResource> resources, sbyte[] shuffle)
+        {
+            m_GameBoard.Restart(shuffle);
+            Resources = resources;
         }
     }
 
     [Serializable] struct SerializationPlayer
     {
-        [SerializedMember("m_PlayerName")] public string PlayerName;
         [SerializedMember("m_DirectoryBoard")] public SerializationDirectoryBoard DirectoryBoard;
         [SerializedMember("m_GameBoard")] public SerializationGameBoard GameBoard;
     }

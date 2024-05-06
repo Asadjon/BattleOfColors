@@ -59,7 +59,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b80e9f4943ba95d418b714a28c380277, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PlayerName: Player
   m_GameBoard: {fileID: 2895652790567403871}
   m_DirectoryBoard: {fileID: 5714997471694304015}
   m_Padding: 16
@@ -166,17 +165,17 @@ PrefabInstance:
     - target: {fileID: 4635624718786409554, guid: f83a4a9830b24784b9186a867c36e693,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0.83824503
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4635624718786409554, guid: f83a4a9830b24784b9186a867c36e693,
         type: 3}
       propertyPath: m_Pivot.x
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4635624718786409554, guid: f83a4a9830b24784b9186a867c36e693,
         type: 3}
       propertyPath: m_Pivot.y
-      value: 0
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4635624718786409555, guid: f83a4a9830b24784b9186a867c36e693,
         type: 3}
@@ -248,7 +247,7 @@ PrefabInstance:
     - target: {fileID: 7877373499037232783, guid: 4f1b35a319041fc4a8f41bba0a69fd37,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 0.90842974
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 7877373499037232783, guid: 4f1b35a319041fc4a8f41bba0a69fd37,
         type: 3}
@@ -284,6 +283,31 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchorMax.x
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7877373499037232783, guid: 4f1b35a319041fc4a8f41bba0a69fd37,
+        type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7877373499037232783, guid: 4f1b35a319041fc4a8f41bba0a69fd37,
+        type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7877373499037232783, guid: 4f1b35a319041fc4a8f41bba0a69fd37,
+        type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7877373499037232783, guid: 4f1b35a319041fc4a8f41bba0a69fd37,
+        type: 3}
+      propertyPath: m_Pivot.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 7877373499037232783, guid: 4f1b35a319041fc4a8f41bba0a69fd37,
+        type: 3}
+      propertyPath: m_Pivot.y
+      value: 0.5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4f1b35a319041fc4a8f41bba0a69fd37, type: 3}

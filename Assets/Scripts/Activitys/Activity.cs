@@ -1,57 +1,53 @@
-﻿using Assets.Scripts.UI;
-using System.Collections;
-using UnityEngine;
-using UnityEngine.EventSystems;
+﻿using System;
+using System.Collections.Generic;
+using static Assets.Scripts.ActivityManager;
 
 namespace Assets.Scripts.Activitys
 {
-    public class Activity : UIBehaviour
+    public abstract class Activity : UILayout
     {
-        [SerializeField] private SafeArea m_SafeArea;
-        [SerializeField] private Transition m_TransitionAnim;
-
-        public static bool IsBack { get; set; } = false;
-        public int SceneId { get; private set; } = 0;
-
         protected override void Awake()
         {
+            if (ActivityManager.Instance)
+                ActivityManager.Instance.AddActivity(this);
             base.Awake();
-            SceneId = ActivitesID.Instance.GetId(GetType());
         }
 
-        protected virtual void Update()
+        protected override void OnDestroy()
         {
-            IsBack = false;
-            if (Input.GetKeyUp(KeyCode.Escape))
-            {
-                IsBack = true;
-                OnBackPressed();
-            }
+            if (ActivityManager.Instance)
+                ActivityManager.Instance.RemoveActivity(this);
+            base.OnDestroy();
         }
 
-        public virtual void OnBackPressed() => Finish();
+        public override void OnBackPressed() => Finish();
 
-        public virtual void PlayActivity()
+        public virtual void OnPlay()
         {
-            if (!gameObject.active) gameObject.SetActive(true);
+            if (!gameObject.activeSelf)
+                gameObject.SetActive(true);
         }
 
-        public virtual void StartActivity() {}
+        public abstract void OnCreate(Bundle bundle);
 
-        public virtual void WaitActivity()
+        public virtual void OnPause()
         {
-            if (gameObject.active) gameObject.SetActive(false);
+            if (gameObject.activeSelf)
+                gameObject.SetActive(false);
         }
 
-        public virtual void Finish()
-        {
-            ActivityManager.GetActivityManager.UnLoadActivity(SceneId);
-        }
+        public virtual void Finish() =>
+            ActivityManager.Instance.UnloadActivity(gameObject.scene);
 
-        protected void StartTransitionAnim(int sceneId)
-        {
-            m_TransitionAnim.StartingEnd.AddListener(() => ActivityManager.GetActivityManager.LoadActivity(sceneId));
-            m_TransitionAnim.StartTransition();
-        }
+        protected void StartActivity<T>() where T : Activity =>
+            ActivityManager.Instance.LoadActivity<T>();
+
+        protected void StartActivity(Type activityType) =>
+            ActivityManager.Instance.LoadActivity(activityType);
+
+        protected void StartActivity<T>(Bundle bundle) where T : Activity =>
+            ActivityManager.Instance.LoadActivity<T>(bundle);
+
+        public class Bundle : Dictionary<string, object> { }
     }
 }

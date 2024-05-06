@@ -1,5 +1,4 @@
-﻿using Assets.Scripts.SaveGameDatas.Attributes;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,24 +6,8 @@ using Vector2 = UnityEngine.Vector2Int;
 
 namespace Assets.Scripts.PuzzleSolvers.SolverClasses
 {
-    [Serialization(typeof(SerializeblePuzzleSolver))]
     public abstract class PuzzleSolver : IComparer<(Node, (int, int))>
     {
-        public static PuzzleSolver NewInstate(Type solverType)
-        {
-            if (!solverType.IsSubclassOf(typeof(PuzzleSolver))) return null;
-            var solver = (PuzzleSolver) Activator.CreateInstance(solverType);
-
-            return solver;
-        }
-        public static T NewInstate<T>(IAdapter adapter, MonoBehaviour component, sbyte[] puzzle = default, sbyte[] goal = default) where T : PuzzleSolver
-        {
-            var solver = Activator.CreateInstance<T>();
-            solver.Initialize(adapter, component, puzzle, goal);
-
-            return solver;
-        }
-
         protected sbyte[] mGoalState;
 
         protected Node mStartNode;
@@ -52,21 +35,22 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
             mAdapter = adapter;
             mGoalState = goal;
             mWillItBeContinued = true;
-            if (puzzle == null) puzzle = new sbyte[(int)Math.Pow(GameOptions.MinNumberOfArrays, 2)];
+            if (puzzle == null) puzzle = new sbyte[(int)Math.Pow((int)GameOptions.MinSizeOfSquare, 2)];
 
             mStartNode = new Node(puzzle);
             mSize = (sbyte)Math.Sqrt(puzzle.Length);
             return this;
         }
 
-        public virtual PuzzleSolver Initialize(IAdapter adapter, MonoBehaviour component)
-        {
-            mComponent = component;
-            mAdapter = adapter;
-            return this;
-        }
 
-        public abstract bool Next();
+        public virtual bool Next()
+        {
+            if (!mWillItBeContinued) return mWillItBeContinued;
+
+            mComponent.StartCoroutine(IsSolve(mStartNode));
+
+            return mWillItBeContinued;
+        }
 
         protected IEnumerator IsSolve(Node root)
         {
@@ -144,13 +128,6 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
         protected abstract bool IsGoal(Node node);
 
         protected abstract void Calculate(Node node);
-    }
-
-    [Serializable] public class SerializeblePuzzleSolver
-    {
-        [SerializedMember("mGoalState")] public sbyte[] GoalState;
-        [SerializedMember("StartState")] public sbyte[] StartState;
-        [SerializedMember("mWillItBeContinued")] public bool WillItBeContinued;
     }
 
     public struct Path

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -7,39 +8,42 @@ namespace Assets.Scripts.SaveGameDatas.Attributes
 {
     internal static class SerializationController
     {
-        public static object GetSavedValue(this object serializationObject) =>
-            serializationObject.GetValueOfSerialization(serializationObject.GetType());
+        public static object GetSavedValue(this object serializationObject)
+        {
+            var type = serializationObject.GetType();
+            if (!type.IsSerialization(out SerializationAttribute serialization)) return null;
+
+            return serializationObject.GetValueOfSerialization(type, serialization.SerializedType);
+        }
 
         public static void SetSavedValue(this object serializationObject, object serializedObject) =>
             serializedObject.SetValueOfSerialization(serializationObject);
 
-        private static object GetValueOfSerialization(this object serializationObject, Type serializationType)
+        private static object GetValueOfSerialization(this object serializationObject, Type serializationType, Type serializedType)
         {
-            if (!serializationType.IsDefined(typeof(SerializationAttribute))) return null;
+            if (serializedType == null) serializedType = serializationType;
 
-            var serializedType = serializationType.GetCustomAttribute<SerializationAttribute>().SerializedType;
             var serializedObject = Activator.CreateInstance(serializedType);
 
-            if (serializedObject == null || !serializedType.TryGetMembersInfo(MemberTypes.Field, out FieldInfo[] fields)) return null;
-            var serializedFields = fields.Where(field => field.IsDefined(typeof(SerializedMemberAttribute))).ToArray();
+            if (serializedObject == null || !serializedType.TryGetMembersInfo(MemberTypes.Field | MemberTypes.Property, out MemberInfo[] members)) return false;
+            var serializedMembers = members.Where(member => member.IsSerialization<SerializedMemberAttribute>(out _)).ToDictionary(member => member, member => { member.IsSerialization(out SerializedMemberAttribute attr); return attr; });
 
-            foreach (var field in serializedFields)
+            foreach (var memberInfo in serializedMembers)
             {
-                var value = field.GetFieldValue(serializationObject, serializationType);
+                var value = memberInfo.Key.GetFieldValue(memberInfo.Value.SerializedMemberName, serializationObject, serializationType);
 
-                if (field.FieldType.IsAssignableFrom(value.GetType()))
-                    field.SetValue(serializedObject, value);
+                if (memberInfo.Key is FieldInfo field && field.FieldType.IsAssignableFrom(value.GetType()) ||
+                    memberInfo.Key is PropertyInfo property && property.PropertyType.IsAssignableFrom(value.GetType()))
+                    memberInfo.Key.SetValue(serializedObject, value);
             }
 
             return serializedObject;
         }
 
-
-        private static object GetFieldValue(this FieldInfo serializedField, object serializationObject, Type serializationType)
+        private static object GetFieldValue(this MemberInfo serializedField, string serializationMemberName, object serializationObject, Type serializationType)
         {
-            var serializedProperty = serializedField.GetCustomAttribute<SerializedMemberAttribute>();
-            var serializationFieldName = serializedProperty != null ? serializedProperty.SerializedPropertyName : serializedField.Name;
-            if (!serializationType.TryGetMemberInfo(serializationFieldName, out MemberInfo serializationMember)) return null;
+            serializationMemberName = string.IsNullOrEmpty(serializationMemberName) ? serializedField.Name : serializationMemberName;
+            if (!serializationType.TryGetMemberInfo(serializationMemberName, out MemberInfo serializationMember)) return null;
 
             object serializationMemberValue = null;
             Type serializationMemberType = null;
@@ -47,71 +51,195 @@ namespace Assets.Scripts.SaveGameDatas.Attributes
             if (serializationMember is FieldInfo serializationField)
             {
                 serializationMemberValue = serializationField.GetValue(serializationObject);
-                serializationMemberType = serializationMemberValue.GetType();
+                serializationMemberType = serializationMemberValue != null ? serializationMemberValue.GetType() : serializationField.FieldType;
             }
             else if (serializationMember is PropertyInfo serializationProperty)
             {
                 serializationMemberValue = serializationProperty.GetValue(serializationObject);
-                serializationMemberType = serializationMemberValue.GetType();
+                serializationMemberType = serializationMemberValue != null ? serializationMemberValue.GetType() : serializationProperty.PropertyType;
             }
 
-            if (serializationMemberType.IsSubclassOf(typeof(Array)) && serializationMemberType.GetElementType().IsDefined(typeof(SerializationAttribute)))
-            {
-                var elementType = serializationMemberType.GetElementType();
-                var arrayValue = (Array)serializationMemberValue;
-                var serializationArray = Array.CreateInstance(elementType.GetCustomAttribute<SerializationAttribute>().SerializedType, arrayValue.Length);
-
-                for (int i = 0; i < arrayValue.Length; i++)
-                    serializationArray.SetValue(GetValueOfSerialization(arrayValue.GetValue(i), elementType), i);
-
-                return serializationArray;
-            }
-            else if (serializationMemberType != null && GetValueOfSerialization(serializationMemberValue, serializationMemberType) is object value && value != null)
-                return value;
+            if (serializationMemberType.TryGetValueOfDictionary(serializationMemberValue, out IDictionary serializationDictionary)) return serializationDictionary;
+            else if (serializationMemberType.TryGetValueOfArray(serializationMemberValue, out Array serializationArray)) return serializationArray;
+            else if (serializationMemberType.TryGetValueOfCollection(serializationMemberValue, out IList serializationCollection)) return serializationCollection;
+            else if (serializationMemberType.TryGetValue(serializationMemberValue, out object value)) return value;
 
             return serializationMemberValue;
         }
 
-        private static void SetValueOfSerialization(this object serializedObject, object serializationObject)
+        private static bool TryGetValue(this Type serializationMemberType, object serializationMemberValue, out object serializationValue)
         {
-            if (serializedObject == null || !serializedObject.GetType().TryGetMembersInfo(MemberTypes.Field, out FieldInfo[] fields)) return;
-            var serializedFields = fields.Where(field => field.IsDefined(typeof(SerializedMemberAttribute))).ToArray();
+            serializationValue = null;
+            if (!serializationMemberType.IsSerialization(out SerializationAttribute serialization)) return false;
 
-            foreach (var field in serializedFields)
-                field.SetFieldValue(serializedObject, serializationObject);
+            serializationValue = serializationMemberValue.GetValueOfSerialization(serializationMemberType, serialization.SerializedType);
+            return true;
         }
 
-        private static void SetFieldValue(this FieldInfo serializedField, object serializedObject, object serializationObject)
+        private static bool TryGetValueOfDictionary(this Type serializationMemberType, object serializationMemberValue, out IDictionary serializationDictionary)
         {
-            var serializationFieldName = serializedField.IsDefined(typeof(SerializedMemberAttribute)) ? serializedField.GetCustomAttribute<SerializedMemberAttribute>().SerializedPropertyName : serializedField.Name;
-            if (!serializationObject.GetType().TryGetMemberInfo(serializationFieldName, out MemberInfo serializationMember)) return;
+            serializationDictionary = null;
+
+            if (!(serializationMemberValue is IDictionary)) return false;
+
+            var dictionary = (IDictionary)serializationMemberValue;
+
+            var keyType = serializationMemberType.GenericTypeArguments[0];
+            var valueType = serializationMemberType.GenericTypeArguments[1];
+
+            var keyIsSerialization = keyType.IsSerialization(out SerializationAttribute serializationAttr1);
+            var valueIsSerialization = valueType.IsSerialization(out SerializationAttribute serializationAttr2);
+
+            if (!keyIsSerialization && !valueIsSerialization)
+            {
+                serializationDictionary = dictionary;
+                return false;
+            }
+
+            var newKeyType = keyType;
+            var newValueType = valueType;
+            if (keyIsSerialization) newKeyType = serializationAttr1.SerializedType;
+            if (valueIsSerialization) newValueType = serializationAttr2.SerializedType;
+
+            serializationDictionary = (IDictionary)Activator.CreateInstance(typeof(Dictionary<,>).MakeGenericType(newKeyType ?? keyType, newValueType ?? valueType));
+
+            if (newKeyType == keyType && newValueType != valueType)
+                foreach (DictionaryEntry keyValuePair in dictionary)
+                    serializationDictionary.Add(keyValuePair.Key, keyValuePair.Value.GetValueOfSerialization(valueType, newValueType));
+
+            else if (newValueType == valueType && newKeyType != newValueType)
+                foreach (DictionaryEntry keyValuePair in dictionary)
+                    serializationDictionary.Add(keyValuePair.Key.GetValueOfSerialization(keyType, newKeyType), keyValuePair.Value);
+
+            else if (newKeyType != newValueType && newValueType != valueType)
+                foreach (DictionaryEntry keyValuePair in dictionary)
+                    serializationDictionary.Add(keyValuePair.Key.GetValueOfSerialization(keyType, newKeyType), keyValuePair.Value.GetValueOfSerialization(valueType, newValueType));
+
+            else serializationDictionary = dictionary;
+
+            return true;
+        }
+
+        private static bool TryGetValueOfArray(this Type memberType, object memberValue, out Array serializationArray)
+        {
+            serializationArray = null;
+
+            Type elementType;
+            if (!memberType.IsArray || !(elementType = memberType.GetElementType()).IsSerialization(out SerializationAttribute serializationAttr)) return false;
+
+            var arrayValue = (Array)memberValue;
+            var serializationType = serializationAttr.SerializedType ?? elementType;
+
+            serializationArray = Array.CreateInstance(serializationType, arrayValue.Length);
+
+            for (int i = 0; i < arrayValue.Length; i++)
+                serializationArray.SetValue(arrayValue.GetValue(i).GetValueOfSerialization(elementType, serializationType), i);
+
+            return true;
+        }
+
+        private static bool TryGetValueOfCollection(this Type serializationMemberType, object serializationMemberValue, out IList serializationCollection)
+        {
+            serializationCollection = null;
+
+            Type elementType;
+            if (serializationMemberType.IsArray || !typeof(IList).IsAssignableFrom(serializationMemberType) || !(elementType = serializationMemberType.GenericTypeArguments[0]).IsSerialization(out SerializationAttribute serializationAttr)) return false;
+
+            var collection = (IList) serializationMemberValue;
+            var serializationType = serializationAttr.SerializedType ?? elementType;
+
+            serializationCollection = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(serializationType));
+
+            for (int i = 0; i < collection.Count; i++)
+                serializationCollection.Add(collection[i].GetValueOfSerialization(elementType, serializationType));
+
+            return true;
+        }
+
+
+
+
+
+        private static void SetValueOfSerialization(this object serializedObject, object serializationObject)
+        {
+            if (serializedObject == null || !serializedObject.GetType().TryGetMembersInfo(MemberTypes.Field | MemberTypes.Property, out MemberInfo[] members)) return;
+            var serializedMembers = members.Where(member => member.IsSerialization<SerializedMemberAttribute>(out _)).ToDictionary(member => member, member => { member.IsSerialization(out SerializedMemberAttribute attr); return attr; });
+
+            foreach (var memberInfo in serializedMembers)
+                memberInfo.Key.SetFieldValue(memberInfo.Value.SerializedMemberName, serializedObject, serializationObject);
+        }
+
+        private static void SetFieldValue(this MemberInfo serializedMember, string serializationMemberName, object serializedObject, object serializationObject)
+        {
+            serializationMemberName = string.IsNullOrEmpty(serializationMemberName) ? serializedMember.Name : serializationMemberName;
+            if (!serializationObject.GetType().TryGetMemberInfo(serializationMemberName, out MemberInfo serializationMember)) return;
 
             var serializationMemberType = serializationMember is FieldInfo info1 ? info1.FieldType : ((PropertyInfo)serializationMember).PropertyType;
 
-            var serializedFieldValue = serializedField.GetValue(serializedObject);
+            var serializedMemberValue = serializedMember.GetValue(serializedObject);
 
-            if (serializationMemberType.IsSubclassOf(typeof(Array)) && serializationMemberType.GetElementType() is Type elementType && elementType.IsDefined(typeof(SerializationAttribute)))
+            if (serializedMemberValue != null)
             {
-                var arrayValue = (Array)serializedFieldValue;
-                var serializationArray = Array.CreateInstance(elementType, arrayValue.Length);
-
-                for (int i = 0; i < arrayValue.Length; i++)
+                if (serializationMemberType.TrySetValueOfDictionary(serializedMemberValue, out IDictionary dictionaryValue)) serializedMemberValue = dictionaryValue;
+                else if (serializationMemberType.TrySetValueOfArray(serializedMemberValue, out Array arrayValue)) serializedMemberValue = arrayValue;
+                else if (serializationMemberType.TrySetValueOfCollection(serializedMemberValue, out IList listValue)) serializedMemberValue = listValue;
+                else if (serializationMemberType.IsSerialization<SerializationAttribute>(out _))
                 {
-                    var serializationValue = Activator.CreateInstance(elementType, true);
-                    if (serializationValue == null) serializationValue = Activator.CreateInstance(elementType, false);
-                    arrayValue.GetValue(i).SetValueOfSerialization(serializationValue);
-                    serializationArray.SetValue(serializationValue, i);
+                    serializedMemberValue.SetValueOfSerialization(serializationMember.GetValue(serializationObject));
+                    return;
                 }
-
-                serializedFieldValue = serializationArray;
             }
-            else if (serializationMemberType.IsDefined(typeof(SerializationAttribute)))
+
+            serializationMember.SetValue(serializationObject, serializedMemberValue);
+        }
+
+        private static bool TrySetValueOfDictionary(this Type memberType, object memberValue, out IDictionary outDictionary)
+        {
+            outDictionary = null;
+            if (!typeof(IDictionary).IsAssignableFrom(memberType)) return false;
+
+
+
+            return true;
+        }
+
+        private static bool TrySetValueOfArray(this Type memberType, object memberValue, out Array outArray)
+        {
+            outArray = null;
+            Type elementType;
+            if (!memberType.IsArray || !(elementType = memberType.GetElementType()).IsSerialization<SerializationAttribute>(out _)) return false;
+
+            var arrayValue = memberValue as Array;
+            outArray = Array.CreateInstance(elementType, arrayValue.Length);
+
+            for (int i = 0; i < arrayValue.Length; i++)
             {
-                serializedFieldValue.SetValueOfSerialization(serializationMember.GetValue(serializationObject));
-                return;
+                var serializationValue = Activator.CreateInstance(elementType, true);
+                if (serializationValue == null) serializationValue = Activator.CreateInstance(elementType, false);
+                arrayValue.GetValue(i).SetValueOfSerialization(serializationValue);
+                outArray.SetValue(serializationValue, i);
             }
 
-            serializationMember.SetValue(serializationObject, serializedFieldValue);
+            return true;
+        }
+
+        private static bool TrySetValueOfCollection(this Type memberType, object memberValue, out IList outList)
+        {
+            outList = null;
+            Type elementType;
+            if (memberValue.GetType().IsArray || !(memberValue is IList list) || !(elementType = memberType.GenericTypeArguments[0]).IsSerialization<SerializationAttribute>(out _)) return false;
+
+            outList = Activator.CreateInstance(memberType) as IList;
+
+            for (int i = 0; i < list.Count; i++)
+            {
+                var serializationValue = Activator.CreateInstance(elementType, true);
+                if (serializationValue == null) serializationValue = Activator.CreateInstance(elementType, false);
+                list[i].SetValueOfSerialization(serializationValue);
+                outList.Add(serializationValue);
+            }
+
+            return true;
         }
 
         private static void SetValue(this MemberInfo memberInfo, object typeObject, object value)
@@ -166,13 +294,22 @@ namespace Assets.Scripts.SaveGameDatas.Attributes
 
             foreach (var parent in parents)
                 foreach (var member in parent.GetMembers(bf))
-                    if (!Array.Exists(outMembersInfo, m => m.Name == member.Name) && member.MemberType == memberTypes)
+                    if (!Array.Exists(outMembersInfo, m => m.Name == member.Name) && (memberTypes & member.MemberType) == member.MemberType)
                     {
                         Array.Resize(ref outMembersInfo, outMembersInfo.Length + 1);
                         outMembersInfo[outMembersInfo.Length - 1] = (T)member;
                     }
 
             return outMembersInfo.Length > 0;
+        }
+
+        private static bool IsSerialization<T>(this MemberInfo memberInfo, out T serialization) where T : Attribute
+        {
+            serialization = null;
+            if (memberInfo == null || !memberInfo.IsDefined(typeof(T))) return false;
+
+            serialization = memberInfo.GetCustomAttribute<T>();
+            return true;
         }
     }
 }

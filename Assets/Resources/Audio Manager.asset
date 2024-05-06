@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-7353421082924821188
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffa4e2b319f03424dae89400384e73f5, type: 3}
+  m_Name: Standard button click
+  m_EditorClassIdentifier: 
+  m_SoundName: Standard button click
+  m_Clip: {fileID: 8300000, guid: a8283a29d29611948bfa494c30241929, type: 3}
+  m_Volume: 1
+  m_Pitch: 0
+  m_Mute: 0
+  m_Loop: 0
+--- !u!114 &-6316927102768984987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffa4e2b319f03424dae89400384e73f5, type: 3}
+  m_Name: Push
+  m_EditorClassIdentifier: 
+  m_SoundName: Push
+  m_Clip: {fileID: 8300000, guid: 0e7a8c391de6124408332411f9bd8c7d, type: 3}
+  m_Volume: 0
+  m_Pitch: 0
+  m_Mute: 0
+  m_Loop: 0
+--- !u!114 &-2259875337518694652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffa4e2b319f03424dae89400384e73f5, type: 3}
+  m_Name: CountDown
+  m_EditorClassIdentifier: 
+  m_SoundName: CountDown
+  m_Clip: {fileID: 8300000, guid: cb172cdcacf5074409e24ea6734622dd, type: 3}
+  m_Volume: 1
+  m_Pitch: 0
+  m_Mute: 0
+  m_Loop: 0
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8429951b620f7034a82f9747724267ff, type: 3}
+  m_Name: Audio Manager
+  m_EditorClassIdentifier: 
+  m_SoundObjects:
+  - {fileID: -6316927102768984987}
+  - {fileID: 6181951557373204465}
+  - {fileID: -2259875337518694652}
+  - {fileID: -7353421082924821188}
+--- !u!114 &6181951557373204465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ffa4e2b319f03424dae89400384e73f5, type: 3}
+  m_Name: End countdown
+  m_EditorClassIdentifier: 
+  m_SoundName: End countdown
+  m_Clip: {fileID: 8300000, guid: 6e326d5b8e0973549b3e2f4cc4add1b3, type: 3}
+  m_Volume: 1
+  m_Pitch: 0
+  m_Mute: 0
+  m_Loop: 0

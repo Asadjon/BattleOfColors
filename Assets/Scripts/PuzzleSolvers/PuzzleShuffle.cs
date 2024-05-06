@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using static Assets.Scripts.GameOptions;
 using URand = UnityEngine.Random;
 
 namespace Assets.Scripts.PuzzleSolvers
 {
     internal static class PuzzleShuffle
     {
-        private static readonly Dictionary<ShuffleLevels, int> mShuffleLevels = new Dictionary<ShuffleLevels, int>
-        { { ShuffleLevels.Easy, 10 }, { ShuffleLevels.Normal, 23 }, { ShuffleLevels.Hard, 47 }, { ShuffleLevels.Expert, 80 } };
-
-        public enum ShuffleLevels { Easy = 0, Normal = 1, Hard = 2, Expert = 3 }
+        private static readonly Dictionary<GameLevels, int> mShuffleLevels = new Dictionary<GameLevels, int>
+        { { GameLevels.Easy, 10 }, { GameLevels.Normal, 23 }, { GameLevels.Hard, 47 }, { GameLevels.Expert, 80 } };
 
         public static List<T> Shuffle<T>(this List<T> nodeList)
         {
@@ -22,7 +20,7 @@ namespace Assets.Scripts.PuzzleSolvers
             return list;
         }
 
-        public static sbyte[] Shuffle(this sbyte[] shufflingList, ShuffleLevels level, int sizeIndex)
+        public static sbyte[] Shuffle(this sbyte[] shufflingList, GameLevels level, int sizeIndex)
         {
             var root = new Node(shufflingList.ToArray());
             var shuffleCount = mShuffleLevels[level] * (sizeIndex + 1);

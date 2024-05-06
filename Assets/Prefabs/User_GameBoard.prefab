@@ -46,7 +46,7 @@ GameObject:
   - component: {fileID: 4635624718786409554}
   - component: {fileID: 8380191227797776697}
   m_Layer: 5
-  m_Name: GameBoard
+  m_Name: User_GameBoard
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -96,7 +96,21 @@ MonoBehaviour:
   m_MaxPadding: 3
   m_OnSwipeViews:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: -6316927102768984987, guid: 425d86ec20bf5754d8ee6af2097fbeed,
+          type: 2}
+        m_TargetAssemblyTypeName: Assets.Scripts.AudioManagers.EditorSoundObject,
+          Assembly-CSharp
+        m_MethodName: Play
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4635624720264160129
 GameObject:
   m_ObjectHideFlags: 0

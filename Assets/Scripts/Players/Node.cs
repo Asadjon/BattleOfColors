@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Assets.Scripts.Players
 {
-    class Node : UIBehaviour
+    internal class Node : UIBehaviour
     {
         [SerializeField] private Image m_Pallet = null;
         private ItemView mItemView = null;

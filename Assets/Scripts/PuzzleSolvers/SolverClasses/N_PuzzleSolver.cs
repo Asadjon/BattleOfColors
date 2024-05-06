@@ -1,12 +1,10 @@
-﻿using Assets.Scripts.SaveGameDatas.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.PuzzleSolvers.SolverClasses
 {
-    [Serialization(typeof(SerializebleN_PuzzleSolver))]
     public sealed class N_PuzzleSolver : PuzzleSolver
     {
         private sbyte[] mPartOfGoal;
@@ -23,11 +21,9 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
                 }
             }
         }
-        private sbyte mLastTarget = 0;
+        private sbyte mLastTarget { get; set; } = 0;
         private sbyte[][] mPattern;
         private Vector2Int mPatternIndex;
-
-        private SerializableVector2Int PatternIndex { get => mPatternIndex; set => mPatternIndex = (Vector2Int)value; }
 
         public N_PuzzleSolver() { }
         public N_PuzzleSolver(IAdapter adapter, MonoBehaviour component, sbyte[] puzzle, sbyte[] goal) : base(adapter, component, puzzle, goal) { }
@@ -35,9 +31,9 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
         public override PuzzleSolver Initialize(IAdapter adapter, MonoBehaviour component, sbyte[] puzzle, sbyte[] goal)
         {
             base.Initialize(adapter, component, puzzle, goal);
-            mPattern = PatternDatabase.mDatabases[mSize - GameOptions.MinNumberOfArrays];
+            mPattern = PatternDatabase.mDatabases[mSize - (int)GameOptions.MinSizeOfSquare];
             mPatternIndex = Vector2Int.zero;
-            mPartOfGoal = new sbyte[0];
+            mPartOfGoal = Array.Empty<sbyte>();
             SetPartOfGoal = mPattern[mPatternIndex.y];
 
             return this;
@@ -45,13 +41,9 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
 
         public override bool Next()
         {
-            if (!mWillItBeContinued) return mWillItBeContinued;
-
             mLastTarget = mPattern[mPatternIndex.y][mPatternIndex.x];
 
-            mComponent.StartCoroutine(IsSolve(mStartNode));
-
-            return mWillItBeContinued;
+            return base.Next();
         }
 
         protected override void PathFound(Node goalNode)
@@ -165,14 +157,6 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
 
             return false;
         }
-    }
-
-    [Serializable] class SerializebleN_PuzzleSolver : SerializeblePuzzleSolver
-    {
-        [SerializedMember("PatternIndex")] public SerializableVector2Int PatternIndex;
-        [SerializedMember("mPattern")] public sbyte[][] Pattern;
-        [SerializedMember("mPartOfGoal")] public sbyte[] PartOfGoal;
-        [SerializedMember("mLastTarget")] public sbyte LastTarget;
     }
 
     internal static class PatternDatabase

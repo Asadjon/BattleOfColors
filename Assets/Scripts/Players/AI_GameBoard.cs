@@ -1,202 +1,192 @@
 ﻿using Assets.Scripts.PuzzleSolvers;
+using Assets.Scripts.PuzzleSolvers.PuzzleEditor;
 using Assets.Scripts.PuzzleSolvers.SolverClasses;
+using Assets.Scripts.Records;
 using Assets.Scripts.Resource;
 using Assets.Scripts.SaveGameDatas.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static Assets.Scripts.GameOptions;
 
 namespace Assets.Scripts.Players
 {
-    [Serialization(typeof(SerializationAI_GameBoard))]
-    sealed class AI_GameBoard : GameBoard, IAdapter
-    {
-        [SerializeField] private (float min, float max) m_LevelSwipeTime;
+	[Serialization(typeof(SerializationAI_GameBoard))]
+	sealed class AI_GameBoard : GameBoard, IAdapter
+	{
+		private PuzzleSolver mSolver;
+		private readonly List<Path> mSolution = new List<Path>();
+		private bool mIsRun;
+		private GameSettings mSettings;
+		private GameOptions mOptions;
 
-        private sbyte[] mFifteenGoalState;
-        private PuzzleSolver mSolver;
-        private List<Path> mSolution;
-        private bool mIsRun;
-        private sbyte[] mShuffledList;
-        private GameSettings mSettings;
+		private float mItemSwipeTime = 0;
+		private float mCurrentTime = 0;
 
-        private float mItemSwipeTime = 0;
-        private float mCurrentTime = 0;
-
-        private int SolverType
-        {
-            get => SerializationAI_GameBoard.GetEnumType(mSolver);
-            set
-            {
-                StopAllCoroutines();
-                (mSolver = PuzzleSolver.NewInstate(SerializationAI_GameBoard.GetPuzzleType(value)))
-                    .Initialize(this, this);
-            }
+		protected override void Set_GameType(GameTypes gameType)
+		{
+			base.Set_GameType(gameType);
+            mItemSwipeTime = GetLevelValue();
         }
 
-        private int Level
-        {
-            get => (int)GameOptions.Instance.Level;
-            set
-            {
-                GameOptions.Instance.Level = (GameOptions.GameLevels)value;
-                m_LevelSwipeTime = GameOptions.Instance.GetLevelValue;
-            }
-        }
-
-        private SerializePath[] Solution
-        {
-            get => mSolution.ConvertAll(p => (SerializePath)p).ToArray();
-            set
-            {
-                mSolution = value.ToList().ConvertAll(p => (Path)p);
-                mSolver.Next();
-            }
+		private List<SerializePath> Solution
+		{
+			get => mSolution.ConvertAll(p => (SerializePath)p);
+			set
+			{
+				if (value == null) return;
+				mSolution.Clear();
+				mSolution.AddRange(value.ConvertAll(p => (Path)p));
+			}
         }
 
         protected override void LoadData()
+		{
+			base.LoadData();
+			mSettings = GameSettings.Instance;
+			mOptions = GameOptions.Instance;
+		}
+
+		private float GetLevelValue()
         {
-            base.LoadData();
-            mSolution = new List<Path>();
-            mSettings = GameSettings.Instance;
-            m_LevelSwipeTime = GameOptions.Instance.GetLevelValue;
-            mItemSwipeTime = GetSwipeTime();
+            var average = AveragePathsCount.Instance.Lerp(mGameType, mGameLevel, mSizeOfSquare, .5f)/* * 2*/;
+            return (float)mOptions.RecordData.GetAverage(RecordData.Parametrs.Time) / average;
         }
 
-        protected override void CreateViews(List<ViewResource> resources)
-        {
-            base.CreateViews(resources);
-            mFifteenGoalState = GetPuzzle();
-            RestartGame();
-        }
+		int countAllSolutions;
+		void IAdapter.FoundSolution(List<Path> solution)
+		{
+			mSolution.AddRange(solution);
 
-        void IAdapter.FoundSolution(List<Path> solution)
-        {
-            mSolution.AddRange(solution);
-            if (mSolution.Count > 0) Debug.Log(mSolution[mSolution.Count - 1].PathToString());
+			countAllSolutions += PathCounter(solution.Select(path => path.direction));
 
-            mSolver.Next();
-        }
-
-        private void Update()
-        {
-            if (mIsRun && !CheckTheWin())
-            {
-                mCurrentTime += Time.deltaTime;
-                if (Run()) mCurrentTime = 0;
+			if (!mSolver.Next() && countAllSolutions != -1 && solution.Count > 0)
+			{
+				print(countAllSolutions.ToString());
+				AveragePathsCount.Instance.Add(mGameType, mGameLevel, mSizeOfSquare, countAllSolutions);
+                print(AveragePathsCount.Instance.Lerp(mGameType, mGameLevel, mSizeOfSquare, .5f).ToString());
+                countAllSolutions = -1;
             }
-            else if (mIsRun && CheckTheWin()) GameOver();
         }
-        private bool Run()
-        {
-            if (mCurrentTime >= mItemSwipeTime && GetPath(out Path step))
+
+		private int PathCounter(IEnumerable<Direction> solution)
+		{
+			if (solution == null || solution.Count() == 0) return 0;
+
+			var dir = solution.First();
+            return solution.Count(dir1 =>
             {
-                var distanceOfSwiping = mSettings.DistanceOfSwiping;
-                for (var i = 1; i < distanceOfSwiping; i++)
-                    if (mSolution.Count == 0 || step.direction != mSolution[0].direction || !GetPath(out step)) break;
-
-                SwitchSpecifiedPositions(step.moveTo - mEmptyNode.PositionInTheArray);
-
-                mItemSwipeTime = GetSwipeTime();
-                return true;
-            }
-            return false;
+				var isNotEqual = dir != dir1;
+                dir = dir1;
+				return isNotEqual;
+            });
         }
 
-        private bool GetPath(out Path path)
-        {
-            if (mSolution.Count > 0)
-            {
-                path = mSolution[0];
-                mSolution.RemoveAt(0);
-                return true;
-            }
+		private void Update()
+		{
+			var checkedTheWin = CheckTheWin();
+			if (mIsRun && !checkedTheWin)
+			{
+				mCurrentTime += Time.deltaTime;
+				if (Run()) mCurrentTime = 0;
+			}
+			else if (mIsRun && checkedTheWin) GameOver();
+		}
+		private bool Run()
+		{
+			if (mCurrentTime >= mItemSwipeTime && GetPath(out Path step))
+			{
+				var distanceOfSwiping = mSettings.DistanceOfSwiping;
+				for (var i = 1; i < distanceOfSwiping; i++)
+					if (mSolution.Count == 0 || step.direction != mSolution.First().direction || !GetPath(out step)) break;
 
-            path = default;
-            return false;
-        }
+				SwitchSpecifiedPositions(step.moveTo - mEmptyNode.PositionInTheArray);
 
-        private float GetSwipeTime() =>
-            UnityEngine.Random.Range(m_LevelSwipeTime.min, m_LevelSwipeTime.max);
+				return true;
+			}
+			return false;
+		}
 
-        public override void PauseGame() => mIsRun = false;
+		private bool GetPath(out Path path)
+		{
+			if (mSolution.Count > 0)
+			{
+				path = mSolution.First();
+				mSolution.RemoveAt(0);
+				return true;
+			}
 
-        public override void PlayGame() => mIsRun = true;
+			path = default;
+			return false;
+		}
 
-        public override void StartGame()
-        {
-            StartShuffle(mShuffledList);
-            PlayGame();
-        }
+		public override void PauseGame() => mIsRun = false;
 
-        public override void Restart()
-        {
-            base.Restart();
-            RestartGame();
-        }
+		public override void PlayGame() => mIsRun = true;
 
-        private void RestartGame()
-        {
-            mSolution.Clear();
-            mShuffledList = mFifteenGoalState.Shuffle((PuzzleShuffle.ShuffleLevels)Level, mNumberOfArrays - GameOptions.MinNumberOfArrays);
-            (mSolver = PuzzleSolver.NewInstate(GameType == GameOptions.GameTypes.WithNumber ? typeof(N_PuzzleSolver) : typeof(Color_PuzzleSolver)))
-                .Initialize(this, this, mShuffledList.ToArray(), GetPuzzle()).Next();
-        }
+		public override void StopGame()
+		{
+			base.StopGame();
+			mSolution.Clear();
+		}
 
-        private bool CheckTheWin() => !mSolver.WillItBeContinued && mSolution.Count <= 0;
+		public override void Restart(sbyte[] shuffle)
+		{
+			base.Restart(shuffle);
+            ReInitSolver();
+		}
 
-        protected override void OnDestroy() => StopAllCoroutines();
-    }
+		private void ReInitSolver()
+		{
+			countAllSolutions = 0;
+            StopAllCoroutines();
+			var startState = mSolution.Count == 0 ? mShuffledList : mSolution.Last().puzzle;
+            (mSolver = GetSolverType().NewInstate().Initialize(this, this, startState, mGoalState)).Next();
+		}
 
-    [Serializable]
-    sealed class SerializationAI_GameBoard : SerializationGameBoard
-    {
-        [SerializedMember("SolverType")] public int SolverType;
-        [SerializedMember("mSolver")] public SerializeblePuzzleSolver Solver;
-        [SerializedMember("Solution")] public SerializePath[] Solution;
-        [SerializedMember("Level")] public int Level;
+        private Type GetSolverType() =>
+			GameType == GameTypes.WithNumber ? typeof(N_PuzzleSolver) : typeof(Color_PuzzleSolver);
 
-        public static int GetEnumType<T>(T solver) where T : PuzzleSolver
-        {
-            if (solver is N_PuzzleSolver) return 0;
-            else if (solver is Color_PuzzleSolver) return 1;
-            else throw new TypeAccessException();
-        }
+        private bool CheckTheWin() => (mSolver == null || !mSolver.WillItBeContinued) && mSolution.Count <= 0;
 
-        public static Type GetPuzzleType(int solverType)
-        {
-            if (solverType == 0) return typeof(N_PuzzleSolver);
-            else if (solverType == 1) return typeof(Color_PuzzleSolver);
-            else throw new TypeAccessException();
-        }
-    }
+		protected override void OnDestroy() => StopAllCoroutines();
+	}
 
-    [Serializable]
-    struct SerializePath
-    {
-        public sbyte[] puzzle;
+	#region Serialize game datas
 
-        public int step;
+	[Serializable]
+	sealed class SerializationAI_GameBoard : SerializationGameBoard
+	{
+		[SerializedMember("Solution")] public List<SerializePath> Solution;
+	}
 
-        public SerializableVector2Int moveTo;
+	[Serializable]
+	struct SerializePath
+	{
+		public sbyte[] puzzle;
 
-        public byte direction;
+		public int step;
 
-        public static implicit operator SerializePath(Path path) => new SerializePath
-        {
-            puzzle = path.puzzle,
-            step = path.step,
-            moveTo = (SerializableVector2Int) path.moveTo,
-            direction = (byte)path.direction
-        };
+		public SerializableVector2Int moveTo;
 
-        public static explicit operator Path(SerializePath path) => new Path
-        {
-            puzzle = path.puzzle,
-            step = path.step,
-            moveTo = (Vector2Int) path.moveTo,
-            direction = (Direction) path.direction
-        };
-    }
+		public byte direction;
+
+		public static implicit operator SerializePath(Path path) => new SerializePath
+		{
+			puzzle = path.puzzle,
+			step = path.step,
+			moveTo = (SerializableVector2Int) path.moveTo,
+			direction = (byte)path.direction
+		};
+
+		public static explicit operator Path(SerializePath path) => new Path
+		{
+			puzzle = path.puzzle,
+			step = path.step,
+			moveTo = (Vector2Int) path.moveTo,
+			direction = (Direction) path.direction
+		};
+	}
+	#endregion
 }

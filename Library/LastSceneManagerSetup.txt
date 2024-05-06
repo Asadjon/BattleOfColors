@@ -8,7 +8,7 @@ sceneSetups:
   isActive: 0
   isSubScene: 0
 - path: Assets/Scenes/Options.unity
-  isLoaded: 0
+  isLoaded: 1
   isActive: 0
   isSubScene: 0
 - path: Assets/Scenes/Records.unity
@@ -16,7 +16,7 @@ sceneSetups:
   isActive: 0
   isSubScene: 0
 - path: Assets/Scenes/SinglePlayerGame.unity
-  isLoaded: 1
+  isLoaded: 0
   isActive: 0
   isSubScene: 0
 - path: Assets/Scenes/MultiplayerGame.unity

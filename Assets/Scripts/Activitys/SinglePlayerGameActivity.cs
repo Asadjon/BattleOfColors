@@ -1,4 +1,4 @@
-﻿ using System;
+﻿using System;
 using UnityEngine;
 using TMPro;
 using Assets.Scripts.Players;
@@ -6,10 +6,13 @@ using Assets.Scripts.Resource;
 using Assets.Scripts.UI;
 using Assets.Scripts.GameControllers;
 using Assets.Scripts.SaveGameDatas;
-
 using static Assets.Scripts.GameControllers.GameController;
-using static Assets.Scripts.Activitys.SinglePlayerGameActivity;
 using Assets.Scripts.SaveGameDatas.Attributes;
+using static Assets.Scripts.GameOptions;
+using Assets.Scripts.Records;
+using System.Collections.Generic;
+using Assets.Scripts.PuzzleSolvers;
+using Assets.Scripts.AudioManagers;
 
 namespace Assets.Scripts.Activitys
 {
@@ -19,28 +22,17 @@ namespace Assets.Scripts.Activitys
         [SerializeField] private Player m_Player;
         [SerializeField] private GameController m_GameController = null;
         [SerializeField] private SecundamerView m_SecundamerView = null;
-        [SerializeField] private TextMeshProUGUI m_TextForRecordTime = null;
-        [SerializeField] private Gradient m_SecundamerGradient = null;
-        [SerializeField] private string m_PushSoundName = default;
+        [SerializeField] private TextMeshProUGUI m_TextForMovesCount = null;
+        [SerializeField] private TextMeshProUGUI m_TextForRecord = null;
+        [SerializeField] private Gradient m_RecordGradient = null;
 
-        private int GameType { get => (int)GameOptions.Instance.GameType; set
-            {
-                GameOptions.Instance.GameType = (GameOptions.GameTypes)value;
-                m_Player.GameType = GameOptions.Instance.GameType;
-            }
-        }
-        private int NumberOfArrays { get => GameOptions.Instance.NumberOfArrays; set
-            {
-                GameOptions.Instance.NumberOfArrays = value;
-                mRecordTime = RecordHelper.GetRecord(value, GameOptions.Instance.GameType).time;
-                m_Player.InitializeGame(value, ViewResource.GenerateResources(value));
-            }
-        }
-        private double TotalMillSec { get => m_SecundamerView.Value; set => m_SecundamerView.Value = value; }
+        private List<ViewResource> mResources = null;
+        protected sbyte[] mGoalState;
 
-        private TimeSpan mRecordTime;
+        private RecordData mRecordData => GameOptions.Instance.RecordData;
+        private UnityEngine.Events.UnityAction<int> mOnChangeValues;
 
-        private const string savedDataFileName = "PlayGame.dat";
+        private const string savedDataFileName = "SingleGame.dat";
 
         protected override void Start()
         {
@@ -50,34 +42,51 @@ namespace Assets.Scripts.Activitys
 
         private void LoadData()
         {
-            OptionsActivity.ActivityType = SceneId;
-            var gameOptions = GameOptions.Instance;
-
-            m_Player.OnGameOver.AddListener(GameOver);
-            m_Player.AddSwipeAction(() => PlaySound(m_PushSoundName));
-
-            mRecordTime = RecordHelper.GetRecord(gameOptions.NumberOfArrays, gameOptions.GameType).time;
-            m_TextForRecordTime.text = "Record: " + mRecordTime.ToString(@"hh\:mm\:ss");
+            mOnChangeValues = movesCount => {
+                m_TextForMovesCount.text = movesCount.ToString();
+                m_TextForMovesCount.color =
+                    m_RecordGradient.Evaluate(
+                        Mathf.Clamp(mRecordData.Sum != 0 ? (float)movesCount / mRecordData.MovesCount : 0, 0, 1));
+            };
 
             m_SecundamerView.OnValueChange.AddListener(time =>
-                m_SecundamerView.ChangeTextColor(
-                    m_SecundamerGradient.Evaluate(
-                        Mathf.Clamp(mRecordTime.TotalMilliseconds != 0 ? (float)(time.TotalMilliseconds / mRecordTime.TotalMilliseconds) : 0, 0, 1))));
+            {
+                m_SecundamerView.TextColor =
+                    m_RecordGradient.Evaluate(
+                        Mathf.Clamp(mRecordData.Sum != 0 ? (float)(time.TotalMilliseconds / mRecordData.RecordTime.TotalMilliseconds) : 0, 0, 1));
+            });
+
+            m_SecundamerView.OnValueLimited.AddListener(time => GameOver(null));
+            m_SecundamerView.MaxTime = TimeSpan.FromHours(1);
 
             m_GameController.SetGameActions(this);
 
-            if (GetSavedData()) PauseGame();
+            m_Player.OnGameOver.AddListener(GameOver);
+            m_Player.AddSwipeAction(mOnChangeValues);
+
+            var isSaveDataReset = GetSavedData();
+            var gameOptions = GameOptions.Instance;
+
+            mGoalState = gameOptions.GoalState;
+            sbyte[] shuffleState = null;
+
+            if (isSaveDataReset) PauseGame();
             else
             {
-                m_Player.GameType = gameOptions.GameType;
-                m_Player.InitializeGame(gameOptions.NumberOfArrays,
-                    ViewResource.GenerateResources(gameOptions.NumberOfArrays));
-
+                mResources = gameOptions.SizeOfSquar.Value().GenerateResources();
                 m_SecundamerView.ResetTime();
-
                 m_GameController.StartGame();
+
+                shuffleState = Shuffle();
             }
+
+            m_Player.InitializeGame(mGoalState, gameOptions.SizeOfSquar, gameOptions.GameType, gameOptions.GameLevel);
+            m_Player.NewGame(mResources, shuffleState);
+
+            m_TextForRecord.text = mRecordData.RecordTime.ToString(@"mm\:ss") + " / " + mRecordData.MovesCount;
+            mOnChangeValues.Invoke(m_Player.MovesCount);
         }
+
         public void PlaySound(string soundName) => AudioManager.Instance.Play(soundName);
 
         private void StartGame()
@@ -86,36 +95,22 @@ namespace Assets.Scripts.Activitys
             m_Player.StartGame();
         }
 
-        private void GameOver(string message, int movesCount)
+        private void GameOver(Player player)
         {
             m_SecundamerView.StopTime();
 
-            message = "Time: " + m_SecundamerView.ToString();
-            var messageColor = Color.white;
+            var message = "<color=white>Time is up</color>";
 
-            if (IsRecordValue(movesCount))
+            if (player)
             {
-                message = "New record:\n" + message;
-                messageColor = Color.green;
+                message = "Time: " + m_SecundamerView.ToString() + "\nMoves: " + player.MovesCount;
+                message = mRecordData.TrySetData(m_SecundamerView.CurrentTime, player.MovesCount) ?
+                "<color=green><size=120>New record</size>\n<size=70>" + message + "</size></color>" : "<color=white>" + message + "</color>";
             }
 
-            message += "\nMoves: " + movesCount;
-
-            m_GameController.SetMessage(message, messageColor);
+            m_GameController.SetMessage(message);
             m_GameController.GameOver();
             m_Player.PauseGame();
-        }
-
-        private bool IsRecordValue(int movesCount)
-        {
-            if (m_SecundamerView.CurrentTime.TotalMilliseconds >= mRecordTime.TotalMilliseconds && mRecordTime.TotalMilliseconds != 0) return false;
-
-            mRecordTime = m_SecundamerView.CurrentTime;
-            RecordHelper.SaveRecord(GameOptions.Instance.NumberOfArrays,
-            new GameTime { hour = mRecordTime.Hours, minute = mRecordTime.Minutes, second = mRecordTime.Seconds },
-            GameOptions.Instance.GameType);
-
-            return true;
         }
 
         public void PauseGameForSettings()
@@ -132,9 +127,17 @@ namespace Assets.Scripts.Activitys
 
         private void NewGame()
         {
-            m_SecundamerView.ChangeTextColor(m_SecundamerGradient.Evaluate(0));
             m_SecundamerView.ResetTime();
-            m_Player.NewGame();
+
+            var shuffle = Shuffle();
+            m_Player.NewGame(mResources, shuffle);
+        }
+
+        public sbyte[] Shuffle()
+        {
+            mResources = mResources?.Shuffle();
+            return mGoalState.Shuffle(GameOptions.Instance.GameLevel,
+                Array.FindIndex((SizesOfSquare[])typeof(SizesOfSquare).GetEnumValues(), size => size == GameOptions.Instance.SizeOfSquar));
         }
 
         void IOnGameActions.OnStartCount() { }
@@ -145,13 +148,14 @@ namespace Assets.Scripts.Activitys
         {
             if (m_GameController.IsGameOver) return;
 
-            m_TextForRecordTime.text = "Record: " + mRecordTime.ToString();
             NewGame();
+            m_TextForRecord.text = mRecordData.RecordTime.ToString(@"hh\:mm\:ss") + " / " + mRecordData.MovesCount;
+            mOnChangeValues.Invoke(m_Player.MovesCount);
         }
 
         void IOnGameActions.OnNextGame() { }
 
-        void IOnGameActions.OnCloseGame() => StartTransitionAnim(ActivitesID.Instance.GetId<OptionsActivity>());
+        void IOnGameActions.OnCloseGame() => Finish();
 
         public void OnResumeGame()
         {
@@ -161,20 +165,28 @@ namespace Assets.Scripts.Activitys
             m_Player.PlayGame();
         }
 
+        public static bool TryGetSavedData(out SerializationGame data) =>
+            GameDataLoader.LoadData(savedDataFileName, out data);
+
         private bool GetSavedData()
         {
-            if (!GameDataLoader.LoadData(savedDataFileName, out SerializationGame data)) return false;
-            this.SetSavedValue(data);
+            if (!TryGetSavedData(out SerializationGame data)) return false;
+            try
+            { this.SetSavedValue(data); }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return false;
+            }
             GameDataLoader.DeleteData(savedDataFileName);
-            GameDataLoader.DeleteData(MainClass.LastLoadedSceneId);
+
             return true;
         }
 
         private void SaveGameData()
         {
-            var data = this.GetSavedValue();
-            GameDataLoader.SaveData(data, savedDataFileName);
-            GameDataLoader.SaveData(SceneId, MainClass.LastLoadedSceneId);
+            if (GameDataLoader.LoadData<SerializationGame>(savedDataFileName, out _)) return;
+            GameDataLoader.SaveData(this.GetSavedValue(), savedDataFileName);
         }
 
         private void OnApplicationPause(bool pause)
@@ -196,7 +208,7 @@ namespace Assets.Scripts.Activitys
 #endif
 
         #region Activites actions
-        public override void StartActivity() => Screen.orientation = ScreenOrientation.Portrait;
+        public override void OnPlay() => Screen.orientation = ScreenOrientation.Portrait;
 
         public override void OnBackPressed()
         {
@@ -204,43 +216,30 @@ namespace Assets.Scripts.Activitys
             PauseGame();
         }
 
-        public override void WaitActivity() => Finish();
+        public override void OnCreate(Bundle bundle)
+        {
+        }
         #endregion
+
+        #region Serialize game datas
+
+        private GameLevels GameLevel { get => GameOptions.Instance.GameLevel; set => GameOptions.Instance.GameLevel = value; }
+
+        private GameTypes GameType { get => GameOptions.Instance.GameType; set => GameOptions.Instance.GameType = value; }
+        private SizesOfSquare SizeOfSquare { get => GameOptions.Instance.SizeOfSquar; set => GameOptions.Instance.SizeOfSquar = value; }
+        private DisplayedTimeSpan CurrentTime { get => m_SecundamerView.CurrentTime; set => m_SecundamerView.CurrentTime = (TimeSpan)value; }
+        private DisplayedTimeSpan MaxTime { get => m_SecundamerView.MaxTime; set => m_SecundamerView.MaxTime = (TimeSpan)value; }
 
         [Serializable] internal struct SerializationGame
         {
-            [SerializedMember("GameType")] public int GameType;
-            [SerializedMember("NumberOfArrays")] public int NumberOfArrays;
-            [SerializedMember("TotalMillSec")] public double TotalMillSec;
+            [SerializedMember("GameType")] public GameTypes GameType;
+            [SerializedMember("GameLevel")] public GameLevels GameLevel;
+            [SerializedMember("SizeOfSquare")] public SizesOfSquare SizeOfSquare;
+            [SerializedMember("CurrentTime")] public DisplayedTimeSpan CurrentTime;
+            [SerializedMember("MaxTime")] public DisplayedTimeSpan MaxTime;
+            [SerializedMember("mResources")] public List<MyViewResource> Resources;
             [SerializedMember("m_Player")] public SerializationPlayer Player;
-
-            public static bool operator ==(SerializationGame game1, SerializationGame game2) => game1.Equals(game2);
-            public static bool operator !=(SerializationGame game1, SerializationGame game2) => !(game1 == game2);
-            public static bool operator !(SerializationGame game) => game != default;
-            public static bool operator true(SerializationGame game) => game == default;
-            public static bool operator false(SerializationGame game) => game != default;
-
-            public override bool Equals(object obj)
-            {
-                if (obj == null || !(obj is SerializationGame game)) return false;
-                else if (base.Equals(obj)) return true;
-
-                return
-                    game.GameType == GameType &&
-                    game.NumberOfArrays == NumberOfArrays &&
-                    game.TotalMillSec == TotalMillSec &&
-                    game.Player.Equals(Player);
-            }
-
-            public override int GetHashCode()
-            {
-                int hashCode = -1776003746;
-                hashCode = hashCode * -1521134295 + GameType.GetHashCode();
-                hashCode = hashCode * -1521134295 + NumberOfArrays.GetHashCode();
-                hashCode = hashCode * -1521134295 + TotalMillSec.GetHashCode();
-                hashCode = hashCode * -1521134295 + Player.GetHashCode();
-                return hashCode;
-            }
         }
+        #endregion
     }
 }

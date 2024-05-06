@@ -1,0 +1,51 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6ec3be9267871624a8050281be5e3b83, type: 3}
+  m_Name: Activites ID
+  m_EditorClassIdentifier: 
+  m_Activities:
+  - activityName: 
+    activityFullName: 
+    scene:
+      m_Handle: -1212
+    index: 0
+    sceneAsset: {fileID: 102900000, guid: 4ca627e844bf65b48ae10161647f45c2, type: 3}
+  - activityName: MenuActivity
+    activityFullName: Assets.Scripts.MenuActivity
+    scene:
+      m_Handle: -1214
+    index: 1
+    sceneAsset: {fileID: 102900000, guid: 2cda990e2423bbf4892e6590ba056729, type: 3}
+  - activityName: SinglePlayerGameActivity
+    activityFullName: Assets.Scripts.Activitys.SinglePlayerGameActivity
+    scene:
+      m_Handle: -1220
+    index: 2
+    sceneAsset: {fileID: 102900000, guid: a34843cc38fa1d946b39d856ec9b289a, type: 3}
+  - activityName: MultiplayerGameActivity
+    activityFullName: Assets.Scripts.Activitys.MultiplayerGameActivity
+    scene:
+      m_Handle: -1222
+    index: 3
+    sceneAsset: {fileID: 102900000, guid: 80c9dcab09e24264a88e83d013c38052, type: 3}
+  - activityName: OptionsActivity
+    activityFullName: Assets.Scripts.Activitys.OptionsActivity
+    scene:
+      m_Handle: -1216
+    index: 4
+    sceneAsset: {fileID: 102900000, guid: f65c7227fe4f4ff41b0c28c2473e9095, type: 3}
+  - activityName: RecordsActivity
+    activityFullName: Assets.Scripts.Activitys.RecordsActivity
+    scene:
+      m_Handle: -1218
+    index: 5
+    sceneAsset: {fileID: 102900000, guid: 54e20eb4247055e4383429ba9593cb78, type: 3}

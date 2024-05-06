@@ -1,11 +1,18 @@
 ﻿using Assets.Scripts.SaveGameDatas.Attributes;
+using Assets.Scripts.Singletones;
 using System;
 using UnityEngine;
+using static Assets.Scripts.Players.ItemView;
+using Assets.Scripts.AudioManagers;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Assets.Scripts
 {
     [Serialization(typeof(SerializeSettings))]
-    class GameSettings : Singltone<GameSettings>
+    internal sealed class GameSettings : SingletoneForScriptableObject<GameSettings>
     {
 
         #region Constantas
@@ -15,27 +22,27 @@ namespace Assets.Scripts
         #endregion
 
         #region SerializeField Objects
-        [SerializeField] private string m_SettingsJsonDataPath = "";
+        [SerializeField] private string m_SettingsJsonDataPath = "/";
         [SerializeField, Range(0f, 1f)] private float m_AudioVolume = DefaultAudioVolume;
-        [SerializeField, Range(1, GameOptions.MaxNumberOfArrays - 1)] private int m_DistanceOfSwiping = GameOptions.MaxNumberOfArrays - 1;
+        [SerializeField, Range(1, GameOptions.MaxSizeOfSquare - GameOptions.MinSizeOfSquare)] private int m_DistanceOfSwiping = GameOptions.MaxSizeOfSquare - GameOptions.MinSizeOfSquare;
         [SerializeField] private bool m_IsMute = false;
         [SerializeField, Range(0f, 1f)] private float m_SwipeLimitSize = DefaultSwipeLimitSize;
         [SerializeField] private float m_SwipingSpeed = .2f;
         [SerializeField] private float m_ShuffleAnimDuration = .2f;
-        [SerializeField] private Players.ItemView.State m_ItemState = Players.ItemView.State.Swipe;
+        [SerializeField] private State m_ItemState = State.Swipe;
         #endregion
 
         #region Getters And Setters
         public float SwipeLimitSize { get => m_SwipeLimitSize; set => m_SwipeLimitSize = Mathf.Clamp(value, 0f, 1f); }
-        public int DistanceOfSwiping { get => m_DistanceOfSwiping; set => m_SwipeLimitSize = Mathf.Clamp(value, 1, GameOptions.MaxNumberOfArrays - 1); }
+        public int DistanceOfSwiping { get => m_DistanceOfSwiping; set => m_SwipeLimitSize = Mathf.Clamp(value, 1, GameOptions.MaxSizeOfSquare - GameOptions.MinSizeOfSquare); }
         public float SwipingSpeed { get => m_SwipingSpeed; set => m_SwipingSpeed = value; }
         public float ShuffleAnimDuration { get => m_ShuffleAnimDuration; set => m_ShuffleAnimDuration = value; }
         public float AudioVolume { get => m_AudioVolume; set => m_AudioVolume = Mathf.Clamp(value, 0f, 1f); }
         public bool IsMute { get => m_IsMute; set => m_IsMute = value; }
-        public Players.ItemView.State ItemState { get => m_ItemState; set => m_ItemState = value; }
+        public State ItemState { get => m_ItemState; set => m_ItemState = value; }
         #endregion
 
-        protected override void LoadData()
+        private void LoadData()
         {
             JsonFileReader.CreateFolder(m_SettingsJsonDataPath);
 
@@ -45,25 +52,34 @@ namespace Assets.Scripts
             else JsonFileReader.Write(this.GetSavedValue(), m_SettingsJsonDataPath, mGameSettingsFileName);
         }
 
-        public void SetSettingsData(float audioVolume, bool isMute, Players.ItemView.State itemState)
+        public void SetSettingsData(float audioVolume, bool isMute, State itemState)
         {
             SetDatas(audioVolume, isMute, itemState);
             JsonFileReader.Write(this.GetSavedValue(), m_SettingsJsonDataPath, mGameSettingsFileName);
             AudioManager.Instance.UpdateSounds();
         }
 
-        private void SetDatas(float audioVolume, bool isMute, Players.ItemView.State itemState)
+        private void SetDatas(float audioVolume, bool isMute, State itemState)
         {
             AudioVolume = audioVolume;
             IsMute = isMute;
             ItemState = itemState;
         }
+
+        [RuntimeInitializeOnLoadMethod]
+#if UNITY_EDITOR
+        [MenuItem("Tools/Singletons/Game Settings")]
+#endif
+        private static void Create() => Create("Assets/Resources/Game Settings.asset");
+
+        [RuntimeInitializeOnLoadMethod]
+        private static void Load() => Instance.LoadData();
     }
 
     [Serializable] struct SerializeSettings
     {
         [SerializedMember("AudioVolume")] public float audioVolume;
         [SerializedMember("IsMute")] public bool isMute;
-        [SerializedMember("ItemState")] public Players.ItemView.State itemState;
+        [SerializedMember("ItemState")] public State itemState;
     }
 }

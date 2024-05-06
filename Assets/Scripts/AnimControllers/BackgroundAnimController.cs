@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Assets.Scripts.AnimControllers
 {
@@ -9,11 +8,13 @@ namespace Assets.Scripts.AnimControllers
 
         private void Awake()
         {
-            Speed = m_Speed;
+            SetParam(0, m_Speed);
         }
 
-        public float Speed { get => m_Speed; set { m_Speed = value; SetParam(0, m_Speed); } }
-
-        public void IsPlay(bool value) => SetParam(1, value);
+        public void IsPlay(bool value)
+        {
+            if (value) SetParam(0, m_Speed);
+            else SetParam(0, 0f);
+        }
     }
 }

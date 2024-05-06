@@ -8,12 +8,11 @@ using static Assets.Scripts.GameSettings;
 using static Assets.Scripts.Players.ItemView.SwipeDirection;
 using static Assets.Scripts.Players.ItemView.State;
 using System;
-using Assets.Scripts.SaveGameDatas.Attributes;
 using static Assets.Scripts.GameOptions;
 
 namespace Assets.Scripts.Players
 {
-    class ItemView : UIBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler, IPointerClickHandler
+    internal class ItemView : UIBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler, IPointerClickHandler
     {
         #region SerializeField Objects
         [SerializeField] private TextMeshProUGUI m_TextView = null;
@@ -29,9 +28,23 @@ namespace Assets.Scripts.Players
         private Vector2 mTouchingPosition;
         private Vector4 mSwipingLimit;
         private GameTypes mGameType;
-        public enum SwipeDirection { Default = -1, Left = 4, Top = 5, Right = 6, Bottom = 7 }
-        public enum SwipeOrientation { Default = -1, Horizontal = Left | Right, Vertical = Top | Bottom }
-        [Serializable] public enum State { Swipe = 0, Click = 1 }
+        public enum SwipeDirection
+        {
+            Left       = 1 << 0,
+            Right      = 1 << 1,
+            Top        = 1 << 2,
+            Bottom     = 1 << 3,
+            Horizontal = Left | Right,
+            Vertical   = Top  | Bottom,
+            All        = Horizontal | Vertical,
+            None       = Horizontal & Vertical
+        }
+
+        [Serializable] public enum State {  
+            Swipe = 1 << 0, 
+            Click = 1 << 1,
+            None = Swipe & Click
+        }
         #endregion
 
         #region Getters And Setters
@@ -93,8 +106,10 @@ namespace Assets.Scripts.Players
 
         private void UpdateUI()
         {
-            (m_TextView.enabled, m_TextView.text, m_TextView.color, m_ColorView.color) =
-                (mGameType == GameTypes.WithNumber, m_Resources.Text, m_Resources.TextColor, m_Resources.Color);
+            m_TextView.enabled = mGameType == GameTypes.WithNumber;
+
+            if (m_Resources != null)
+                (m_TextView.text, m_TextView.color, m_ColorView.color) = (m_Resources.Text, m_Resources.TextColor, m_Resources.Color);
         }
 
         public void ChangeChildOffset(float offset)
@@ -129,21 +144,20 @@ namespace Assets.Scripts.Players
         private void CheckDirection(Vector2 position)
         {
             var dir = mTouchingPosition - position;
-            SwipeDirection direction;
+            var positiveDir = new Vector2(Mathf.Abs(dir.x), Mathf.Abs(dir.y));
+            var direction = SwipeDirection.None;
 
             // horizontal movement
-            if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y))
+            if (positiveDir.x > positiveDir.y)
             {
                 if (dir.x < mSwipingLimit.x) direction = Right;
                 else if (dir.x > mSwipingLimit.z) direction = Left;
-                else return;
             }
             // vertical movement
-            else if (Mathf.Abs(dir.x) < Mathf.Abs(dir.y))
+            else if (positiveDir.x < positiveDir.y)
             {
                 if (dir.y < mSwipingLimit.y) direction = Top;
                 else if (dir.y > mSwipingLimit.w) direction = Bottom;
-                else return;
             }
 
             else
@@ -152,7 +166,6 @@ namespace Assets.Scripts.Players
                 else if (dir.x > mSwipingLimit.z) direction = Left;
                 else if (dir.y < mSwipingLimit.y) direction = Top;
                 else if (dir.y > mSwipingLimit.w) direction = Bottom;
-                else return;
             }
 
             mIsAllowOnce = !OnSwipe.OnSwipe(mNode.PositionInTheArray, Swipe, direction);
@@ -160,7 +173,7 @@ namespace Assets.Scripts.Players
 
         public interface IOnSwipe
         {
-            bool OnSwipe(Vector2Int position, State state, SwipeDirection direction = Default);
+            bool OnSwipe(Vector2Int position, State state, SwipeDirection direction = SwipeDirection.None);
         }
 
 #if UNITY_EDITOR

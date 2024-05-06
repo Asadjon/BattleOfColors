@@ -1,5 +1,5 @@
-﻿using System.IO;
-using UnityEngine;
+﻿using Newtonsoft.Json;
+using System.IO;
 
 namespace Assets.Scripts
 {
@@ -18,7 +18,7 @@ namespace Assets.Scripts
             outputObject = default;
             if (!File.Exists(path)) return false;
 
-            outputObject = JsonUtility.FromJson<T>(File.ReadAllText(path));
+            outputObject = JsonConvert.DeserializeObject<T>(File.ReadAllText(path));
             return true;
         }
 
@@ -29,7 +29,7 @@ namespace Assets.Scripts
             if (!File.Exists(path))
                 new FileStream(path, FileMode.Create, FileAccess.ReadWrite).Close();
 
-            File.WriteAllText(path, JsonUtility.ToJson(obj));
+            File.WriteAllText(path, JsonConvert.SerializeObject(obj));
         }
     }
 }

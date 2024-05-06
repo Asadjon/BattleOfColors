@@ -97,7 +97,6 @@ MonoBehaviour:
   m_OnSwipeViews:
     m_PersistentCalls:
       m_Calls: []
-  EachItemSwipeTime: 0.2
 --- !u!1 &4635624720264160129
 GameObject:
   m_ObjectHideFlags: 0

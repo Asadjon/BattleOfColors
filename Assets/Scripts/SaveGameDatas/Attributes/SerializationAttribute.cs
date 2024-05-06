@@ -12,6 +12,8 @@ namespace Assets.Scripts.SaveGameDatas.Attributes
     {
         public Type SerializedType;
 
+        public SerializationAttribute() { }
+
         public SerializationAttribute(Type serializedType)
         {
             SerializedType = serializedType;

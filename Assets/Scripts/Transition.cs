@@ -1,17 +1,50 @@
-﻿using Assets.Scripts.AnimControllers;
-using UnityEngine.Events;
+﻿using UnityEngine.Events;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
-namespace Assets.Scripts
+namespace Assets.Scripts.UI
 {
-    class Transition : AnimController
+    public class Transition : UIBehaviour
     {
-        [UnityEngine.SerializeField] private float m_Duration = 1f;
-        public UnityEvent StartingEnd = null;
+        [SerializeField] private Animator m_Animator;
+        [SerializeField] private float m_Duration = 1f;
 
-        public void OnEnable() => SetParam(0, m_Duration);
+        private bool mIsRunning
+        {
+            get
+            {
+                var state = m_Animator.GetCurrentAnimatorStateInfo(0);
+                return state.IsName("LoadingStart");
+            }
+        }
 
-        public void StartTransition() => SetParam(1, default(char));
+        public UnityAction StartingEnd = null;
+
+        public void StartTransition()
+        {
+            if (!mIsRunning)
+                StartAnim("start");
+        }
+
+        public void EndTransition()
+        {
+            if (mIsRunning)
+                StartAnim("end");
+        }
+
+        private void StartAnim(string triggerName)
+        {
+            if (m_Animator)
+                m_Animator.SetTrigger(triggerName);
+        }
 
         public void StartAnimEnding() => StartingEnd.Invoke();
+
+        protected override void Awake()
+        {
+            base.Awake();
+            if (!m_Animator)
+                m_Animator = GetComponentInChildren<Animator>();
+        }
     }
 }

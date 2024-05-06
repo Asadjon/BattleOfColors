@@ -1,63 +1,77 @@
-﻿using System.Collections.Generic;
+﻿using Assets.Scripts.Records;
+using Assets.Scripts.Singletones;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.Events;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Assets.Scripts
 {
-    internal class GameOptions : Singltone<GameOptions>, ISerializationCallbackReceiver
+    internal sealed class GameOptions : SingletoneForScriptableObject<GameOptions>
     {
         public enum GameLevels { Easy = 0, Normal = 1, Hard = 2, Expert = 3 }
+
         public enum GameTypes { WithColor = 0, WithNumber = 1 }
 
-        #region Constantas
-        private static readonly Dictionary<GameLevels, (float, float)> Levels = new Dictionary<GameLevels, (float, float)>
-        { { GameLevels.Easy, (1f, 1.5f) }, { GameLevels.Normal, (.5f, .75f) }, { GameLevels.Hard, (.25f, .375f) }, { GameLevels.Expert, (.125f, .1875f) } };
+        public enum SizesOfSquare { _3x3 = 3, _4x4 = 4, _5x5 = 5, _6x6 = 6, _7x7 = 7, _8x8 = 8 }
 
-        public const int DefaultNumberOfArrays = 3;
-        public const int MinNumberOfArrays = 3;
-        public const int MaxNumberOfArrays = 8;
+        #region Constantas
+        public const SizesOfSquare DefaultSizeOfSquare = SizesOfSquare._3x3;
+        public const SizesOfSquare MinSizeOfSquare = SizesOfSquare._3x3;
+        public const SizesOfSquare MaxSizeOfSquare = SizesOfSquare._8x8;
         public const GameTypes DefaultGameType = GameTypes.WithColor;
         public const GameLevels DefaultGameLevel = GameLevels.Normal;
         #endregion
 
         #region SerializeField Objects
-        [SerializeField, Range(MinNumberOfArrays, MaxNumberOfArrays)] private int m_NumberOfArrays = DefaultNumberOfArrays;
-        [SerializeField] private GameLevels m_Level = DefaultGameLevel;
+        [SerializeField] private SizesOfSquare m_SizeOfSquare = DefaultSizeOfSquare;
+        [SerializeField] private GameLevels m_GameLevel = DefaultGameLevel;
         [SerializeField] private GameTypes m_GameType = DefaultGameType;
-        [SerializeField] private UnityEvent<int> m_OnChangeNumberOfArrays;
         #endregion
 
         #region Getters And Setters
-        public int NumberOfArrays { get => m_NumberOfArrays; set => m_NumberOfArrays = Mathf.Clamp(value, MinNumberOfArrays, MaxNumberOfArrays); }
-        public GameTypes GameType { get => m_GameType; set => m_GameType = value; }
-        public UnityEvent<int> OnChangeNumberOfArrays => m_OnChangeNumberOfArrays;
-
-        private (float, float) mLevelValue;
-        public (float min, float max) GetLevelValue => mLevelValue;
-        public GameLevels Level { get => m_Level; set
+        public SizesOfSquare SizeOfSquar { get => m_SizeOfSquare; set { m_SizeOfSquare = value; GetRecordData(); } }
+        public GameTypes GameType { get => m_GameType; set { m_GameType = value; GetRecordData(); } }
+        public GameLevels GameLevel { get => m_GameLevel; set { m_GameLevel = value; GetRecordData(); } }
+        public RecordData RecordData => mRecordData;
+        public sbyte[] GoalState
+        {
+            get
             {
-                m_Level = value;
-                mLevelValue = Levels[m_Level];
+                var goal = new List<int>(Enumerable.Range(1, (int)Math.Pow(m_SizeOfSquare.Value(), 2) - 1)) { 0 };
+                return goal.ConvertAll(i => (sbyte)i).ToArray();
             }
         }
         #endregion
 
-        protected override void LoadData() =>
-            Level = m_Level;
+        private RecordData mRecordData = null;
+        private void GetRecordData() => mRecordData = RecordController.Instance[m_GameType][m_SizeOfSquare][m_GameLevel];
 
-        private int mOldNumberOfArrays;
-        public void OnBeforeSerialize()
+        private void LoadData()
         {
-            if (mOldNumberOfArrays != m_NumberOfArrays)
-            {
-                mOldNumberOfArrays = m_NumberOfArrays;
-                m_OnChangeNumberOfArrays.Invoke(m_NumberOfArrays);
-            }
+            m_SizeOfSquare = DefaultSizeOfSquare;
+            m_GameLevel = DefaultGameLevel;
+            m_GameType = DefaultGameType;
+
+            GetRecordData();
         }
 
-        public void OnAfterDeserialize()
-        {
+        [RuntimeInitializeOnLoadMethod]
+        static void Load() => Instance?.LoadData();
 
-        }
+
+        [RuntimeInitializeOnLoadMethod]
+#if UNITY_EDITOR
+        [MenuItem("Tools/Singletons/Game Options")]
+#endif
+        static void Create() => Create("Assets/Resources/Game Options.asset");
+    }
+    static class SizesOfSquareHelper
+    {
+        public static int Value(this GameOptions.SizesOfSquare size) => (int)size;
     }
 }

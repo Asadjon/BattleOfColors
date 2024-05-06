@@ -8,7 +8,7 @@ namespace Assets.Scripts.Editors
 {
 #if UNITY_EDITOR
     [CustomEditor(typeof(TimerView))]
-    class TimerViewEditor : UnityEditor.Editor
+    class TimerViewEditor : Editor
     {
         public override void OnInspectorGUI()
         {

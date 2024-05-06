@@ -1,12 +1,10 @@
-﻿using Assets.Scripts.SaveGameDatas.Attributes;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
 namespace Assets.Scripts.PuzzleSolvers.SolverClasses
 {
-    [Serialization(typeof(SerializebleColor_PuzzleSolver))]
     public sealed class Color_PuzzleSolver : PuzzleSolver
     {
         private sbyte[] mPartOfGoal;
@@ -33,22 +31,13 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
             return this;
         }
 
-        public override bool Next()
-        {
-            if (!mWillItBeContinued) return mWillItBeContinued;
-
-            mComponent.StartCoroutine(IsSolve(mStartNode));
-
-            return mWillItBeContinued;
-        }
-
         protected override void PathFound(Node goalNode)
         {
             mWillItBeContinued = false;
-            if (mPartIndex + 1 < mSize)
+            if (PartIndex + 1 < mSize)
             {
                 mWillItBeContinued = true;
-                PartIndex = ++mPartIndex;
+                PartIndex = ++PartIndex;
             }
 
             base.PathFound(goalNode);
@@ -59,7 +48,7 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
 
         protected override bool IsGoal(Node node)
         {
-            for (var i = 0; i <= mPartIndex; i++) for (var j = 0; j < mSize; j++)
+            for (var i = 0; i <= PartIndex; i++) for (var j = 0; j < mSize; j++)
                 {
                     var index = j * mSize + i;
                     if (mGoalState[index] != node.mPuzzle[index]) return false;
@@ -91,14 +80,14 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
         {
             ushort manhattnDistance1 = 0;
 
-            for (int i = 0; i < mPartIndex; i++) for (int j = 0; j < puzzle.Length; j++)
+            for (int i = 0; i < PartIndex; i++) for (int j = 0; j < puzzle.Length; j++)
                     if (puzzle[j] == mPartOfGoal[i])
                         manhattnDistance1 += (ushort)Mathf.Abs(i - j.ConvertIndexToVector(mSize).x);
 
             ushort manhattnDistance2 = 0;
             for (int j = 0; j < puzzle.Length; j++)
-                    if (puzzle[j] == mPartOfGoal[mPartIndex])
-                        manhattnDistance2 += (ushort)Mathf.Abs(mPartIndex - j.ConvertIndexToVector(mSize).x);
+                    if (puzzle[j] == mPartOfGoal[PartIndex])
+                        manhattnDistance2 += (ushort)Mathf.Abs(PartIndex - j.ConvertIndexToVector(mSize).x);
 
             return (ushort)(manhattnDistance1 + manhattnDistance2 * 3);
         }
@@ -141,10 +130,5 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
             }
             return colorPuzzle;
         }
-    }
-
-    [Serializable] class SerializebleColor_PuzzleSolver : SerializeblePuzzleSolver
-    {
-        [SerializedMember("PartIndex")] public sbyte PartIndex;
     }
 }

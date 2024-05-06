@@ -9,16 +9,16 @@ namespace Assets.Scripts.Custom
     public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
         [SerializeField] private bool m_IsModifiedCount;
-        [SerializeField] private List<SerializationKeyValuePair> m_List;
+        [SerializeField] private List<SerializationKeyValuePair> m_List = new List<SerializationKeyValuePair>();
 
-        public void OnBeforeSerialize()
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
             if (m_IsModifiedCount) return;
             m_List.Clear();
             ForEach(keyValuePair => m_List.Add((SerializationKeyValuePair)keyValuePair));
         }
 
-        public void OnAfterDeserialize()
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
             Clear();
             try

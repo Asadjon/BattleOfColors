@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Assets.Scripts.AudioManagers;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -16,14 +17,6 @@ namespace Assets.Scripts.AnimControllers
 
         private void ChangeCounting() => ((mIsCounting = !mIsCounting) ? StartCounter : EndCounter).Invoke();
 
-        private void PlayCountdownSound()
-        {
-            AudioManager.Instance.Play("Countdown");
-        }
-
-        private void PlayEndCountdownSound()
-        {
-            AudioManager.Instance.Play("End countdown");
-        }
+        private void PlaySound(EditorSoundObject soundObject) => soundObject.Play();
     }
 }

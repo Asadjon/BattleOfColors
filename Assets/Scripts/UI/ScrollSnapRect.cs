@@ -1,13 +1,12 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
-using System.Collections;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(Image))]
 [RequireComponent(typeof(Mask))]
 [RequireComponent(typeof(ScrollRect))]
-public class ScrollSnapRect : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler {
+public class ScrollSnapRect : UIBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler {
 
     [Tooltip("Set starting page index - starting from 0")]
     public int startingPage = 0;
@@ -117,12 +116,12 @@ public class ScrollSnapRect : MonoBehaviour, IBeginDragHandler, IEndDragHandler,
 
     //------------------------------------------------------------------------
     private void SetPagePositions() {
-        int width = 0;
-        int height = 0;
-        int offsetX = 0;
-        int offsetY = 0;
-        int containerWidth = 0;
-        int containerHeight = 0;
+        var width = 0;
+        var height = 0;
+        var offsetX = 0;
+        var offsetY = 0;
+        var containerWidth = 0;
+        var containerHeight = 0;
 
         if (_horizontal) {
             // screen width in pixels of scrollrect window
@@ -141,10 +140,8 @@ public class ScrollSnapRect : MonoBehaviour, IBeginDragHandler, IEndDragHandler,
         }
 
         // set width of container
-        Vector2 newSize = new Vector2(containerWidth, containerHeight);
-        _container.sizeDelta = newSize;
-        Vector2 newPosition = new Vector2(containerWidth / 2, containerHeight / 2);
-        _container.anchoredPosition = newPosition;
+        _container.sizeDelta = new Vector2(containerWidth, containerHeight);
+        _container.anchoredPosition = new Vector2(containerWidth / 2, containerHeight / 2);
 
         // delete any previous settings
         _pagePositions.Clear();
