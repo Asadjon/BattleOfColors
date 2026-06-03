@@ -77,7 +77,6 @@
     <Compile Include="Assets\Scripts\SaveGameDatas\Attributes\SerializationAttribute.cs" />
     <Compile Include="Assets\Scripts\SaveGameDatas\Attributes\SerializedPropertyAttribute.cs" />
     <Compile Include="Assets\Scripts\UI\SecundamerView.cs" />
-    <Compile Include="Assets\Scripts\PuzzleSolvers\PuzzleEditor\AveragePathsCount.cs" />
     <Compile Include="Assets\Scripts\PuzzleSolvers\SolverClasses\Color_PuzzleSolcer.cs" />
     <Compile Include="Assets\Scripts\Players\Node.cs" />
     <Compile Include="Assets\Scripts\UI\ScrollView.cs" />
@@ -109,6 +108,7 @@
     <Compile Include="Assets\Scripts\Players\Player.cs" />
     <Compile Include="Assets\Scripts\Activitys\Activity.cs" />
     <Compile Include="Assets\Scripts\ColorGenerator.cs" />
+    <Compile Include="Assets\Scripts\Players\AITimingProfile.cs" />
     <Compile Include="Assets\Scripts\PuzzleSolvers\Node.cs" />
     <Compile Include="Assets\Scripts\Activitys\ActivitesID.cs" />
     <Compile Include="Assets\Scripts\UI\CustomGridLayoutGroup.cs" />

@@ -110,7 +110,16 @@ namespace Assets.Scripts.Activitys
             var message = "<color=white>Game over!</color>";
 
             if (player == m_UserPlayer)
+            {
+                AITimingProfile.RegisterPlayerGame(
+                    GameOptions.Instance.GameType,
+                    GameOptions.Instance.GameLevel,
+                    GameOptions.Instance.SizeOfSquar,
+                    m_SecundamerView.CurrentTime,
+                    m_UserPlayer.MovesCount);
+
                 message = "<color=green>You won!</color>";
+            }
             else if (player == m_AIPlayer)
                 message = "<color=red>You didn‘t win!</color>";
 

@@ -1,5 +1,4 @@
 ﻿using Assets.Scripts.PuzzleSolvers;
-using Assets.Scripts.PuzzleSolvers.PuzzleEditor;
 using Assets.Scripts.PuzzleSolvers.SolverClasses;
 using Assets.Scripts.Records;
 using Assets.Scripts.Resource;
@@ -50,9 +49,63 @@ namespace Assets.Scripts.Players
 
 		private float GetLevelValue()
         {
-            var average = AveragePathsCount.Instance.Lerp(mGameType, mGameLevel, mSizeOfSquare, .5f)/* * 2*/;
-            return (float)mOptions.RecordData.GetAverage(RecordData.Parametrs.Time) / average;
+            var baseDelay = GetDefaultItemSwipeTime();
+            var calibratedDelay = GetRecordItemSwipeTime(baseDelay);
+
+            if (AITimingProfile.TryGetAverageMoveTime(mGameType, mGameLevel, mSizeOfSquare, out var playerMoveTime))
+                calibratedDelay = playerMoveTime;
+
+            var adaptiveDelay = calibratedDelay * GetDifficultyRatio();
+            var blendedDelay = Mathf.Lerp(baseDelay, adaptiveDelay, .65f);
+
+            return Mathf.Clamp(blendedDelay, GetMinItemSwipeTime(), GetMaxItemSwipeTime());
         }
+
+        private float GetRecordItemSwipeTime(float fallback)
+        {
+            var averageMoves = (float)mOptions.RecordData.GetAverage(RecordData.Parametrs.Moves);
+            var averageTime = (float)mOptions.RecordData.GetAverage(RecordData.Parametrs.Time);
+
+            return averageMoves > 0 && averageTime > 0
+                ? averageTime / averageMoves
+                : fallback;
+        }
+
+        private float GetDefaultItemSwipeTime() => mGameLevel switch
+        {
+            GameLevels.Easy => .45f,
+            GameLevels.Normal => .35f,
+            GameLevels.Hard => .25f,
+            GameLevels.Expert => .18f,
+            _ => .35f,
+        };
+
+        private float GetDifficultyRatio() => mGameLevel switch
+        {
+            GameLevels.Easy => 1.25f,
+            GameLevels.Normal => 1f,
+            GameLevels.Hard => .85f,
+            GameLevels.Expert => .7f,
+            _ => 1f,
+        };
+
+        private float GetMinItemSwipeTime() => mGameLevel switch
+        {
+            GameLevels.Easy => .28f,
+            GameLevels.Normal => .2f,
+            GameLevels.Hard => .14f,
+            GameLevels.Expert => .1f,
+            _ => .2f,
+        };
+
+        private float GetMaxItemSwipeTime() => mGameLevel switch
+        {
+            GameLevels.Easy => .8f,
+            GameLevels.Normal => .65f,
+            GameLevels.Hard => .5f,
+            GameLevels.Expert => .4f,
+            _ => .65f,
+        };
 
 		int countAllSolutions;
 		void IAdapter.FoundSolution(List<Path> solution)
@@ -64,8 +117,6 @@ namespace Assets.Scripts.Players
 			if (!mSolver.Next() && countAllSolutions != -1 && solution.Count > 0)
 			{
 				print(countAllSolutions.ToString());
-				AveragePathsCount.Instance.Add(mGameType, mGameLevel, mSizeOfSquare, countAllSolutions);
-                print(AveragePathsCount.Instance.Lerp(mGameType, mGameLevel, mSizeOfSquare, .5f).ToString());
                 countAllSolutions = -1;
             }
         }
