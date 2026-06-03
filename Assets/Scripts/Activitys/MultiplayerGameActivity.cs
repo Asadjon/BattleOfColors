@@ -9,7 +9,6 @@ using Assets.Scripts.SaveGameDatas;
 using static Assets.Scripts.GameControllers.GameController;
 using Assets.Scripts.SaveGameDatas.Attributes;
 using static Assets.Scripts.GameOptions;
-using Assets.Scripts.Records;
 using System.Collections.Generic;
 using Assets.Scripts.PuzzleSolvers;
 using Assets.Scripts.AudioManagers;
@@ -23,14 +22,11 @@ namespace Assets.Scripts.Activitys
         [SerializeField] private Player m_AIPlayer = null;
         [SerializeField] private GameController m_GameController = null;
         [SerializeField] private SecundamerView m_SecundamerView = null;
-        [SerializeField] private Gradient m_SecundamerGradient = null;
         [SerializeField] private string m_PushSoundName = default;
 
         private List<ViewResource> mResources = null;
         protected sbyte[] mGoalState;
         //protected sbyte[] mShuffledList;
-
-        private RecordData mRecordData => GameOptions.Instance.RecordData;
 
         private const string savedDataFileName = "MultiGame.dat";
 
@@ -62,7 +58,7 @@ namespace Assets.Scripts.Activitys
             m_GameController.SetGameActions(this);
 
             m_SecundamerView.TextFormat = /*hh\\\n\\·\\·\\\n*/"mm\\\n\\·\\·\\\nss";
-            m_SecundamerView.Inverse = true;
+            m_SecundamerView.Inverse = false;
 
             var isSaveDataReset = GetSavedData();
             var gameOptions = GameOptions.Instance;
@@ -74,7 +70,6 @@ namespace Assets.Scripts.Activitys
             else
             {
                 mResources = ((int)gameOptions.SizeOfSquar).GenerateResources();
-                m_SecundamerView.MaxTime = TimeSpan.FromSeconds((double)mRecordData.GetAverage(RecordData.Parametrs.Time));
                 m_SecundamerView.ResetTime();
                 m_GameController.StartGame();
 
@@ -86,10 +81,6 @@ namespace Assets.Scripts.Activitys
 
             m_UserPlayer.NewGame(mResources, shuffleState);
             m_AIPlayer.NewGame(mResources, shuffleState);
-
-            m_SecundamerView.OnValueChange.AddListener(time =>
-                m_SecundamerView.TextColor = m_SecundamerGradient.Evaluate(1f - Mathf.Clamp(mRecordData.Sum != 0 ? (float)(time.TotalMilliseconds / mRecordData.RecordTime.TotalMilliseconds) : 0, 0, 1)));
-            m_SecundamerView.OnValueLimited.AddListener(_ => GameOver(null));
         }
 
         public void PlaySound(string soundName) => AudioManager.Instance.Play(soundName);
@@ -144,7 +135,6 @@ namespace Assets.Scripts.Activitys
 
         private void NewGame()
         {
-            m_SecundamerView.MaxTime = TimeSpan.FromSeconds((double)mRecordData.GetAverage(RecordData.Parametrs.Time));
             m_SecundamerView.ResetTime();
 
             var shuffle = Shuffle();
