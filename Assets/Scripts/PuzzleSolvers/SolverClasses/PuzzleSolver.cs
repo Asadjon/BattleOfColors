@@ -8,6 +8,8 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
 {
     public abstract class PuzzleSolver : IComparer<(Node, (int, int))>
     {
+        private const int YieldInterval = 128;
+
         protected sbyte[] mGoalState;
 
         protected Node mStartNode;
@@ -35,7 +37,7 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
             mAdapter = adapter;
             mGoalState = goal;
             mWillItBeContinued = true;
-            if (puzzle == null) puzzle = new sbyte[(int)Math.Pow((int)GameOptions.MinSizeOfSquare, 2)];
+            puzzle ??= new sbyte[(int)Math.Pow((int)GameOptions.MinSizeOfSquare, 2)];
 
             mStartNode = new Node(puzzle);
             mSize = (sbyte)Math.Sqrt(puzzle.Length);
@@ -63,11 +65,13 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
                 yield break;
             }
 
-            var openList = new List<(Node, (int, int) priority)>();
-            var closeList = new List<(Node, (int, int) priority)>
-            { (currentNode, (currentNode.mCost, currentNode.mStep)) };
+            var openList = new NodePriorityHeap(this);
+            var openKeys = new HashSet<string>();
+            var closedKeys = new HashSet<string> { GetStateKey(currentNode) };
+            var iterations = 0;
 
-            do {
+            do
+            {
 
                 foreach (var currentChild in currentNode.ExpandNode())
                 {
@@ -77,25 +81,41 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
                         PathFound(currentChild);
                         yield break;
                     }
-                    else if (!Contains(openList, currentChild) && !Contains(closeList, currentChild))
-                    {
-                        Calculate(currentChild);
-                        openList.Add((currentChild, (currentChild.mCost, currentChild.mStep)));
-                        openList.Sort(this);
-                    }
+                    var childKey = GetStateKey(currentChild);
+                    if (closedKeys.Contains(childKey) || openKeys.Contains(childKey))
+                        continue;
+
+                    Calculate(currentChild);
+                    openList.Push(currentChild);
+                    openKeys.Add(childKey);
                 }
 
                 if (openList.Count == 0) break;
-                var current = openList[0];
-                openList.RemoveAt(0);
-                closeList.Add(current);
-                currentNode = current.Item1;
 
-                yield return null;
+                do
+                {
+                    currentNode = openList.Pop();
+                    openKeys.Remove(GetStateKey(currentNode));
+                }
+                while (openList.Count > 0 && closedKeys.Contains(GetStateKey(currentNode)));
 
-            } while (openList.Count >= 0);
+                closedKeys.Add(GetStateKey(currentNode));
+
+                if (++iterations % YieldInterval == 0)
+                    yield return null;
+
+            } while (openList.Count > 0);
 
             mWillItBeContinued = false;
+        }
+
+        protected virtual string GetStateKey(Node node)
+        {
+            var key = new char[node.mPuzzle.Length];
+            for (var i = 0; i < node.mPuzzle.Length; i++)
+                key[i] = (char)(node.mPuzzle[i] + 1);
+
+            return new string(key);
         }
 
         int IComparer<(Node, (int, int))>.Compare((Node, (int, int)) x, (Node, (int, int)) y)
@@ -123,6 +143,76 @@ namespace Assets.Scripts.PuzzleSolvers.SolverClasses
             foreach (var (child, (_, _)) in queue)
                 if (target.Equals(child)) return true;
             return false;
+        }
+
+        private sealed class NodePriorityHeap
+        {
+            private readonly IComparer<(Node, (int, int))> mComparer;
+            private readonly List<Node> mNodes = new();
+
+            public NodePriorityHeap(IComparer<(Node, (int, int))> comparer)
+            {
+                mComparer = comparer;
+            }
+
+            public int Count => mNodes.Count;
+
+            public void Push(Node node)
+            {
+                mNodes.Add(node);
+
+                var index = mNodes.Count - 1;
+                while (index > 0)
+                {
+                    var parentIndex = (index - 1) / 2;
+                    if (Compare(mNodes[index], mNodes[parentIndex]) >= 0)
+                        break;
+
+                    Swap(index, parentIndex);
+                    index = parentIndex;
+                }
+            }
+
+            public Node Pop()
+            {
+                var result = mNodes[0];
+                var last = mNodes[^1];
+                mNodes.RemoveAt(mNodes.Count - 1);
+
+                if (mNodes.Count == 0)
+                    return result;
+
+                mNodes[0] = last;
+                Heapify(0);
+                return result;
+            }
+
+            private void Heapify(int index)
+            {
+                while (true)
+                {
+                    var left = index * 2 + 1;
+                    var right = left + 1;
+                    var smallest = index;
+
+                    if (left < mNodes.Count && Compare(mNodes[left], mNodes[smallest]) < 0)
+                        smallest = left;
+
+                    if (right < mNodes.Count && Compare(mNodes[right], mNodes[smallest]) < 0)
+                        smallest = right;
+
+                    if (smallest == index)
+                        return;
+
+                    Swap(index, smallest);
+                    index = smallest;
+                }
+            }
+
+            private int Compare(Node x, Node y) =>
+                mComparer.Compare((x, (x.mCost, x.mStep)), (y, (y.mCost, y.mStep)));
+
+            private void Swap(int a, int b) => (mNodes[b], mNodes[a]) = (mNodes[a], mNodes[b]);
         }
 
         protected abstract bool IsGoal(Node node);
