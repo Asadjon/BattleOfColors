@@ -6,17 +6,21 @@ namespace Assets.Scripts.Activitys
 {
     public abstract class Activity : UILayout
     {
+        protected ActivityManager _activityManager;
+
         protected override void Awake()
         {
-            if (ActivityManager.Instance)
-                ActivityManager.Instance.AddActivity(this);
+            _activityManager = ActivityManager.Instance;
+
+            if (_activityManager)
+                _activityManager.AddActivity(this);
             base.Awake();
         }
 
         protected override void OnDestroy()
         {
-            if (ActivityManager.Instance)
-                ActivityManager.Instance.RemoveActivity(this);
+            if (_activityManager)
+                _activityManager.RemoveActivity(this);
             base.OnDestroy();
         }
 
@@ -37,16 +41,16 @@ namespace Assets.Scripts.Activitys
         }
 
         public virtual void Finish() =>
-            ActivityManager.Instance.UnloadActivity(gameObject.scene);
+            _activityManager.UnloadActivity(gameObject.scene);
 
         protected void StartActivity<T>() where T : Activity =>
-            ActivityManager.Instance.LoadActivity<T>();
+            _activityManager.LoadActivity<T>();
 
         protected void StartActivity(Type activityType) =>
-            ActivityManager.Instance.LoadActivity(activityType);
+            _activityManager.LoadActivity(activityType);
 
         protected void StartActivity<T>(Bundle bundle) where T : Activity =>
-            ActivityManager.Instance.LoadActivity<T>(bundle);
+            _activityManager.LoadActivity<T>(bundle);
 
         public class Bundle : Dictionary<string, object> { }
     }

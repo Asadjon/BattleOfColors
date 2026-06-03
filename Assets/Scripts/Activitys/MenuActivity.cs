@@ -1,8 +1,7 @@
-﻿using Assets.Scripts.Activitys;
-using UnityEngine;
+﻿using UnityEngine;
 using static UnityEngine.Screen;
 
-namespace Assets.Scripts
+namespace Assets.Scripts.Activitys
 {
     public class MenuActivity : Activity
     {

@@ -13,39 +13,39 @@ MonoBehaviour:
   m_Name: Activites ID
   m_EditorClassIdentifier: 
   m_Activities:
-  - activityName: 
-    activityFullName: 
-    scene:
-      m_Handle: -1212
-    index: 0
-    sceneAsset: {fileID: 102900000, guid: 4ca627e844bf65b48ae10161647f45c2, type: 3}
-  - activityName: MenuActivity
-    activityFullName: Assets.Scripts.MenuActivity
-    scene:
-      m_Handle: -1214
-    index: 1
-    sceneAsset: {fileID: 102900000, guid: 2cda990e2423bbf4892e6590ba056729, type: 3}
-  - activityName: SinglePlayerGameActivity
-    activityFullName: Assets.Scripts.Activitys.SinglePlayerGameActivity
-    scene:
-      m_Handle: -1220
-    index: 2
-    sceneAsset: {fileID: 102900000, guid: a34843cc38fa1d946b39d856ec9b289a, type: 3}
-  - activityName: MultiplayerGameActivity
-    activityFullName: Assets.Scripts.Activitys.MultiplayerGameActivity
-    scene:
-      m_Handle: -1222
-    index: 3
-    sceneAsset: {fileID: 102900000, guid: 80c9dcab09e24264a88e83d013c38052, type: 3}
-  - activityName: OptionsActivity
-    activityFullName: Assets.Scripts.Activitys.OptionsActivity
-    scene:
-      m_Handle: -1216
-    index: 4
-    sceneAsset: {fileID: 102900000, guid: f65c7227fe4f4ff41b0c28c2473e9095, type: 3}
-  - activityName: RecordsActivity
-    activityFullName: Assets.Scripts.Activitys.RecordsActivity
-    scene:
-      m_Handle: -1218
-    index: 5
-    sceneAsset: {fileID: 102900000, guid: 54e20eb4247055e4383429ba9593cb78, type: 3}
+  - _activityName: 
+    _activityFullName: 
+    Scene:
+      m_Handle: -1298
+    Index: 0
+    SceneAsset: {fileID: 102900000, guid: 4ca627e844bf65b48ae10161647f45c2, type: 3}
+  - _activityName: MenuActivity
+    _activityFullName: Assets.Scripts.Activitys.MenuActivity
+    Scene:
+      m_Handle: -1300
+    Index: 1
+    SceneAsset: {fileID: 102900000, guid: 2cda990e2423bbf4892e6590ba056729, type: 3}
+  - _activityName: SinglePlayerGameActivity
+    _activityFullName: Assets.Scripts.Activitys.SinglePlayerGameActivity
+    Scene:
+      m_Handle: -1306
+    Index: 2
+    SceneAsset: {fileID: 102900000, guid: a34843cc38fa1d946b39d856ec9b289a, type: 3}
+  - _activityName: MultiplayerGameActivity
+    _activityFullName: Assets.Scripts.Activitys.MultiplayerGameActivity
+    Scene:
+      m_Handle: -1308
+    Index: 3
+    SceneAsset: {fileID: 102900000, guid: 80c9dcab09e24264a88e83d013c38052, type: 3}
+  - _activityName: OptionsActivity
+    _activityFullName: Assets.Scripts.Activitys.OptionsActivity
+    Scene:
+      m_Handle: -1302
+    Index: 4
+    SceneAsset: {fileID: 102900000, guid: f65c7227fe4f4ff41b0c28c2473e9095, type: 3}
+  - _activityName: RecordsActivity
+    _activityFullName: Assets.Scripts.Activitys.RecordsActivity
+    Scene:
+      m_Handle: -1304
+    Index: 5
+    SceneAsset: {fileID: 102900000, guid: 54e20eb4247055e4383429ba9593cb78, type: 3}

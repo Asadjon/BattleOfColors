@@ -152,9 +152,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 969ce8dbfabe6104aa7be08d2527c198, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Transition: {fileID: 6238277239954673301, guid: c6a1efe2493e6df4bac65f9717fb980b,
+  _transition: {fileID: 6238277239954673301, guid: c6a1efe2493e6df4bac65f9717fb980b,
     type: 3}
-  m_ActivitesID: {fileID: 11400000, guid: 3e1fee2ce39ec3049a134618a8d2ed5a, type: 2}
+  _activitesID: {fileID: 11400000, guid: 3e1fee2ce39ec3049a134618a8d2ed5a, type: 2}
 --- !u!4 &21098042
 Transform:
   m_ObjectHideFlags: 0

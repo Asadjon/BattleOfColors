@@ -4,8 +4,6 @@ using Assets.Scripts.Records;
 using Assets.Scripts.SaveGameDatas;
 using System;
 using UnityEngine;
-using static Assets.Scripts.Activitys.Activity;
-using UnityEngine.SceneManagement;
 
 namespace Assets.Scripts
 {
@@ -32,7 +30,9 @@ namespace Assets.Scripts
 
         private void Start()
         {
-            ActivityManager.Instance.LoadActivity(typeof(MenuActivity));
+            var activityManager = ActivityManager.Instance;
+
+            activityManager.LoadActivity(typeof(MenuActivity));
 
             Type savingGameActivity;
             if (SinglePlayerGameActivity.TryGetSavedData(out _))
@@ -42,8 +42,8 @@ namespace Assets.Scripts
                 savingGameActivity = typeof(MultiplayerGameActivity);
             else return;
 
-            ActivityManager.Instance.LoadActivity(typeof(OptionsActivity), new Bundle { { OptionsActivity.ACTIVITY_TYPE, savingGameActivity } });
-            ActivityManager.Instance.LoadActivity(savingGameActivity);
+            activityManager.LoadActivity<OptionsActivity>(new Activity.Bundle { { OptionsActivity.ACTIVITY_TYPE, savingGameActivity } });
+            activityManager.LoadActivity(savingGameActivity);
         }
     }
 }

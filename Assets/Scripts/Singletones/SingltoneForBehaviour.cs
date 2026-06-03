@@ -7,7 +7,6 @@ namespace Assets.Scripts
         private static T mInstance;
         public static T Instance { get => mInstance ? mInstance : (mInstance = FindObjectOfType<T>()); private set => mInstance = value; }
 
-        [System.Obsolete]
         private void Awake()
         {
             if (!mInstance)

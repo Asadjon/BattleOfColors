@@ -48,9 +48,10 @@ namespace Assets.Scripts.Activitys
 
         public void ShowIs(bool value)
         {
-            if (ActivityManager.Instance)
-                if (value) ActivityManager.Instance.AddUILayout(this);
-                else ActivityManager.Instance.RemoveUILayout(this);
+            var activityManager = ActivityManager.Instance;
+            if (activityManager)
+                if (value) activityManager.AddUILayout(this);
+                else activityManager.RemoveUILayout(this);
 
             m_AnimController.SetParam(0, value);
             if (value) LoadData();

@@ -1,62 +1,40 @@
 ﻿using Assets.Scripts.Activitys;
+using Assets.Scripts.UI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine.SceneManagement;
-using System;
-using Assets.Scripts.UI;
-using static UnityEngine.SceneManagement.SceneManager;
-using static Assets.Scripts.Activitys.Activity;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using static Assets.Scripts.Activitys.Activity;
 
 namespace Assets.Scripts
 {
-    internal static class Initializer
-    {
-        //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        //private static void Initialize() =>
-        //    LoadScene(0, LoadSceneMode.Single);
-    }
-
     public class ActivityManager : SingltoneForBehaviour<ActivityManager>
     {
-        [SerializeField] private Transition m_Transition;
-        [SerializeField] private ActivitesID m_ActivitesID;
+        [SerializeField] private Transition _transition;
+        [SerializeField] private ActivitesID _activitesID;
 
-        private readonly List<UILayout> mAllLoadedUILayouts = new List<UILayout>();
-        private KeyValuePair<Scene, Activity> mActiveSceneActivity;
-        private readonly Dictionary<Scene, Activity> mWaitingSceneActivitys = new Dictionary<Scene, Activity>();
-        private readonly Dictionary<Type, Bundle> mBundleList = new Dictionary<Type, Bundle>();
-        private TransitionAnimLoadActions mTransitionAnimLoadActions;
-        private TransitionAnimUnloadActions mTransitionAnimUnloadActions;
-
-        protected ActivityManager() : base()
-        {
-            mTransitionAnimLoadActions = new TransitionAnimLoadActions(this);
-            mTransitionAnimUnloadActions = new TransitionAnimUnloadActions(this);
-        }
+        private readonly List<UILayout> _allLoadedUILayouts = new();
+        private KeyValuePair<Scene, Activity> _activeSceneActivity;
+        private readonly Dictionary<Scene, Activity> _waitingSceneActivities = new();
+        private readonly Dictionary<Type, Bundle> _bundles = new();
+        private ITransitionAnimActions _transitionAnimLoadActions;
+        private ITransitionAnimActions _transitionAnimUnloadActions;
 
         protected override void LoadData()
         {
-            _ = m_ActivitesID.GetId<MenuActivity>();
-            m_Transition = CreateTransition();
-            m_Transition.StartingEnd += mTransitionAnimLoadActions.OnLoadActivityTransitionEnd;
-            m_Transition.StartingEnd += mTransitionAnimUnloadActions.OnUnloadActivityTransitionEnd;
-
-            //void action(Scene scene)
-            //{
-            //    if (scene.buildIndex != 0) m_Transition.EndTransition();
-            //}
-
-            //sceneLoaded += (scane, __) => action(scane);
-            //sceneUnloaded += (scane) => action(scane);
+            _ = _activitesID.GetId<MenuActivity>();
+            _transition = CreateTransition();
+            _transitionAnimLoadActions = new TransitionAnimLoadActions(_transition);
+            _transitionAnimUnloadActions = new TransitionAnimUnloadActions(_transition);
         }
 
         private Transition CreateTransition()
         {
-            if (!m_Transition) return null;
+            if (!_transition) return null;
 
-            var transitionAnim = Instantiate(m_Transition);
+            var transitionAnim = Instantiate(_transition);
             DontDestroyOnLoad(transitionAnim);
             return transitionAnim;
         }
@@ -71,18 +49,12 @@ namespace Assets.Scripts
 #endif
                 )
             {
-                var lastLoadedUILayout = mAllLoadedUILayouts.LastOrDefault();
+                var lastLoadedUILayout = _allLoadedUILayouts.LastOrDefault();
                 if (lastLoadedUILayout)
                     lastLoadedUILayout.OnBackPressed();
                 else
                     ExitApp();
             }
-        }
-
-        public List<T> GetActivitys<T>() where T : Activity
-        {
-            var allActivity = new List<Activity>(mWaitingSceneActivitys.Values.ToList()) { mActiveSceneActivity.Value };
-            return allActivity.FindAll(activity => activity as T).ConvertAll(activity => (T)activity);
         }
 
         public void LoadActivity<T>() where T : Activity =>
@@ -92,81 +64,23 @@ namespace Assets.Scripts
             LoadActivity(typeof(T), bundle);
 
         public void LoadActivity(Type activityType) =>
-            LoadActivity(activityType, new Bundle());
-
-        private class TransitionAnimLoadActions
-        {
-            private readonly ActivityManager mManager;
-            private readonly List<Type> mActivityTypes = new List<Type>();
-
-            internal TransitionAnimLoadActions(ActivityManager manager)
-            {
-                mManager = manager;
-            }
-
-            public static TransitionAnimLoadActions operator +(TransitionAnimLoadActions actions, Type loadedActivityType)
-            {
-                if (actions == null) throw new ArgumentNullException(nameof(actions));
-                actions.mActivityTypes.Add(loadedActivityType);
-                return actions;
-            }
-
-            internal void OnLoadActivityTransitionEnd()
-            {
-                if (mActivityTypes.Count == 0) return;
-
-                mActivityTypes.ForEach(activityType =>
-                {
-                    int sceneID = mManager.m_ActivitesID.GetId(activityType);
-                    LoadSceneAsync(sceneID, LoadSceneMode.Additive).completed += (asyncOperation) =>
-                    {
-                        mActivityTypes.Remove(activityType);
-                        mManager.m_Transition.EndTransition();
-                        _ = SetActiveScene(GetSceneByBuildIndex(sceneID));
-                    };
-                });
-            }
-        }
+            LoadActivity(activityType, null);
 
         public void LoadActivity(Type activityType, Bundle bundle)
         {
-            mTransitionAnimLoadActions += activityType;
-
-            mBundleList.Add(activityType, bundle);
-
-            m_Transition.StartTransition();
-        }
-
-        private class TransitionAnimUnloadActions
-        {
-            private readonly ActivityManager mManager;
-            internal Scene unloadingScene;
-
-            internal TransitionAnimUnloadActions(ActivityManager manager)
-            {
-                mManager = manager;
-            }
-
-            internal void OnUnloadActivityTransitionEnd()
-            {
-                if (unloadingScene == default) return;
-
-                UnloadSceneAsync(unloadingScene).completed += (asyncOperation) =>
-                {
-                    mManager.m_Transition.EndTransition();
-                    unloadingScene = default;
-                };
-            }
+            _transitionAnimLoadActions.SetValue(_activitesID.GetId(activityType));
+            _bundles[activityType] = bundle ?? new Bundle();
+            _transitionAnimLoadActions.StartTransition();
         }
 
         public void UnloadActivity(Scene unloadingScene)
         {
-            if (mWaitingSceneActivitys.ContainsKey(unloadingScene))
-                _ = UnloadSceneAsync(unloadingScene);
+            if (_waitingSceneActivities.ContainsKey(unloadingScene))
+                _ = SceneManager.UnloadSceneAsync(unloadingScene);
             else
             {
-                mTransitionAnimUnloadActions.unloadingScene = unloadingScene;
-                m_Transition.StartTransition();
+                _transitionAnimUnloadActions.SetValue(unloadingScene);
+                _transitionAnimUnloadActions.StartTransition();
             }
         }
 
@@ -174,46 +88,48 @@ namespace Assets.Scripts
         {
             if (!AddUILayout(activity)) return;
 
-            if (mActiveSceneActivity.Value)
+            if (_activeSceneActivity.Value)
             {
-                mWaitingSceneActivitys.Add(mActiveSceneActivity.Key, mActiveSceneActivity.Value);
-                mActiveSceneActivity.Value.OnPause();
+                _waitingSceneActivities[_activeSceneActivity.Key] = _activeSceneActivity.Value;
+                _activeSceneActivity.Value.OnPause();
             }
 
             var scene = activity.gameObject.scene;
-            mActiveSceneActivity = new KeyValuePair<Scene, Activity>(scene, activity);
+            _activeSceneActivity = new KeyValuePair<Scene, Activity>(scene, activity);
 
             var bundle = new Bundle();
-            var typeForBundleKey = mActiveSceneActivity.Value.GetType();
-            if (mBundleList.ContainsKey(typeForBundleKey))
+            var typeForBundleKey = _activeSceneActivity.Value.GetType();
+            if (_bundles.TryGetValue(typeForBundleKey, out var savedBundle))
             {
-                bundle = mBundleList[typeForBundleKey];
-                mBundleList.Remove(typeForBundleKey);
+                bundle = savedBundle;
+                _bundles.Remove(typeForBundleKey);
             }
-            mActiveSceneActivity.Value.OnCreate(bundle);
-            mActiveSceneActivity.Value.OnPlay();
+            _activeSceneActivity.Value.OnCreate(bundle);
+            _activeSceneActivity.Value.OnPlay();
         }
 
         public void RemoveActivity(Activity removedActivity)
         {
+            if (!removedActivity) return;
+
             var scene = removedActivity.gameObject.scene;
 
-            if (mWaitingSceneActivitys.ContainsKey(scene))
-                _ = mWaitingSceneActivitys.Remove(scene);
+            if (_waitingSceneActivities.ContainsKey(scene))
+                _ = _waitingSceneActivities.Remove(scene);
 
-            if (mActiveSceneActivity.Key == scene)
+            if (_activeSceneActivity.Key == scene)
             {
-                mActiveSceneActivity.Value.OnPause();
-                mActiveSceneActivity = default;
+                _activeSceneActivity.Value.OnPause();
+                _activeSceneActivity = default;
 
-                var oldLoadedSceneActivity = mWaitingSceneActivitys.LastOrDefault();
+                var oldLoadedSceneActivity = _waitingSceneActivities.LastOrDefault();
 
                 if (oldLoadedSceneActivity.Value)
                 {
-                    mActiveSceneActivity = new KeyValuePair<Scene, Activity>(oldLoadedSceneActivity.Key, oldLoadedSceneActivity.Value);
-                    mWaitingSceneActivitys.Remove(oldLoadedSceneActivity.Key);
-                    mActiveSceneActivity.Value.OnPlay();
-                    _ = SetActiveScene(mActiveSceneActivity.Key);
+                    _activeSceneActivity = new KeyValuePair<Scene, Activity>(oldLoadedSceneActivity.Key, oldLoadedSceneActivity.Value);
+                    _waitingSceneActivities.Remove(oldLoadedSceneActivity.Key);
+                    _activeSceneActivity.Value.OnPlay();
+                    _ = SceneManager.SetActiveScene(_activeSceneActivity.Key);
                 }
                 else ExitApp();
             }
@@ -223,17 +139,17 @@ namespace Assets.Scripts
 
         public bool AddUILayout(UILayout uiLayout)
         {
-            if (!uiLayout || mAllLoadedUILayouts.Contains(uiLayout)) return false;
+            if (!uiLayout || _allLoadedUILayouts.Contains(uiLayout)) return false;
 
-            mAllLoadedUILayouts.Add(uiLayout);
+            _allLoadedUILayouts.Add(uiLayout);
             return true;
         }
 
         public void RemoveUILayout(UILayout uiLayout)
         {
-            if (!mAllLoadedUILayouts.Contains(uiLayout) && !uiLayout) return;
+            if (!uiLayout || !_allLoadedUILayouts.Contains(uiLayout)) return;
 
-            mAllLoadedUILayouts.Remove(uiLayout);
+            _allLoadedUILayouts.Remove(uiLayout);
         }
 
         private void ExitApp()
@@ -244,11 +160,118 @@ namespace Assets.Scripts
 #endif
         }
 
-
         [DisallowMultipleComponent]
         public abstract class UILayout : UIBehaviour
         {
             public abstract void OnBackPressed();
+        }
+
+        private interface ITransitionAnimActions
+        {
+            void SetValue(object value);
+            void StartTransition();
+            void EndTransition();
+        }
+
+        private abstract class TransitionAnimAction<T> : ITransitionAnimActions
+        {
+            protected readonly Transition _transition;
+            protected bool _isTransitionStarting;
+
+            public TransitionAnimAction(Transition transition)
+            {
+                if (!transition) return;
+
+                _transition = transition;
+                _transition.StartingEnd += OnActivityTransitionEnd;
+            }
+
+            private void OnActivityTransitionEnd()
+            {
+                if (_isTransitionStarting)
+                    ActivityTransitionEnd();
+            }
+
+            protected abstract void ActivityTransitionEnd();
+
+            public void StartTransition()
+            {
+                if (_isTransitionStarting) return;
+
+                if (_transition)
+                {
+                    _transition.StartTransition();
+                    _isTransitionStarting = true;
+                }
+                else ActivityTransitionEnd();
+            }
+
+            public void EndTransition()
+            {
+                if (_isTransitionStarting && _transition)
+                {
+                    _transition.EndTransition();
+                    _isTransitionStarting = false;
+                }
+            }
+
+            public abstract void SetValue(T value);
+
+            public void SetValue(object value)
+            {
+                if (value is T t)
+                    SetValue(t);
+            }
+        }
+
+        private class TransitionAnimLoadActions : TransitionAnimAction<int>
+        {
+            private readonly HashSet<int> _activitySceneBuildIndexes = new();
+
+            public TransitionAnimLoadActions(Transition transition) : base(transition) { }
+
+            public override void SetValue(int loadedActivityBuildIndex)
+            {
+                if (loadedActivityBuildIndex < 0 || loadedActivityBuildIndex >= SceneManager.sceneCountInBuildSettings)
+                    throw new IndexOutOfRangeException(nameof(loadedActivityBuildIndex));
+                _activitySceneBuildIndexes.Add(loadedActivityBuildIndex);
+            }
+
+            protected override void ActivityTransitionEnd()
+            {
+                if (_activitySceneBuildIndexes.Count == 0) return;
+
+                foreach (var sceneBuildIndex in _activitySceneBuildIndexes)
+                    SceneManager.LoadSceneAsync(sceneBuildIndex, LoadSceneMode.Additive).completed += (asyncOperation) =>
+                    {
+                        _ = SceneManager.SetActiveScene(SceneManager.GetSceneByBuildIndex(sceneBuildIndex));
+                        _activitySceneBuildIndexes.Remove(sceneBuildIndex);
+                        if (_activitySceneBuildIndexes.Count == 0) EndTransition();
+                    };
+            }
+        }
+
+        private class TransitionAnimUnloadActions : TransitionAnimAction<Scene>
+        {
+            private Scene _unloadingScene;
+
+            public TransitionAnimUnloadActions(Transition transition) : base(transition) { }
+
+            protected override void ActivityTransitionEnd()
+            {
+                if (_unloadingScene == default) return;
+
+                SceneManager.UnloadSceneAsync(_unloadingScene).completed += (asyncOperation) =>
+                {
+                    EndTransition();
+                    _unloadingScene = default;
+                };
+            }
+
+            public override void SetValue(Scene unloadingScene)
+            {
+                _unloadingScene = unloadingScene;
+            }
         }
     }
 }
